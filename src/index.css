@@ -1,0 +1,5 @@
+@import "tailwindcss";
+*:focus-visible { outline: 3px solid rgba(46, 125, 50, .45); outline-offset: 3px; }
+button, a, input, select, textarea { touch-action: manipulation; }
+@media (max-width: 420px) { [role="dialog"] { max-height: 94vh; border-radius: 1.5rem 1.5rem 0 0; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
