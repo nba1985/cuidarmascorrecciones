@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Ban, CheckCircle2, Clock3, Pencil } from "lucide-react";
+import { AlarmClockPlus, Ban, CheckCircle2, Clock3, Pencil } from "lucide-react";
 import {
   actualizarRecordatorio,
   crearRegistroToma,
   obtenerRecordatoriosUsuario,
+  posponerRecordatorio,
   type RecordatorioApi,
   type UsuarioApi,
 } from "../services/api";
@@ -47,6 +48,7 @@ export function Recordatorios() {
   const [horaEditada, setHoraEditada] = useState("");
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
 
   useEffect(() => {
     void cargarRecordatorios();
@@ -77,7 +79,7 @@ export function Recordatorios() {
 
     try {
       setGuardando(true);
-      await crearRegistroToma({
+      const registro = await crearRegistroToma({
         estado,
         fechaHoraReal: new Date().toISOString(),
         observaciones: estado ? "Dosis confirmada" : "Dosis omitida",
@@ -85,13 +87,22 @@ export function Recordatorios() {
         idHistorialAnimo: null,
       });
 
-      if (estado) {
-        navigate("/app/historial-animo");
-      } else {
-        alert("Dosis omitida.");
-      }
+      navigate("/app/historial-animo", { state: { idRegistroToma: registro.idRegistroToma } });
     } catch (err) {
       alert(err instanceof Error ? err.message : "No se pudo guardar el registro de toma.");
+    }
+  }
+
+  async function posponer(item: RecordatorioVista) {
+    try {
+      setGuardando(true);
+      await posponerRecordatorio(item.id, 10);
+      await cargarRecordatorios();
+      alert("Recordatorio pospuesto 10 minutos.");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "No se pudo posponer el recordatorio.");
+    } finally {
+      setGuardando(false);
     }
   }
 
@@ -137,6 +148,10 @@ export function Recordatorios() {
         {error && <p className="mt-4 text-red-600">{error}</p>}
       </div>
 
+      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
+        <input type="search" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} placeholder="Buscar recordatorio o medicamento..." aria-label="Buscar recordatorios" className="w-full rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E7D32]/20" />
+      </div>
+
       <div className="relative">
         <div className="absolute left-6 md:left-8 top-0 bottom-0 w-1 bg-[#D9D9D9]" />
 
@@ -145,7 +160,7 @@ export function Recordatorios() {
           {!cargando && error && <ErrorState message={error} onRetry={() => void cargarRecordatorios()} />}
           {!cargando && recordatorios.length === 0 && !error && <EmptyState title="No hay recordatorios programados" description="Editá un medicamento y asignale un horario para crear el primer recordatorio." />}
 
-          {recordatorios.map((item, index) => (
+          {recordatorios.filter((item) => `${item.titulo} ${item.descripcion} ${item.hora}`.toLocaleLowerCase("es-AR").includes(busqueda.toLocaleLowerCase("es-AR"))).map((item, index) => (
             <div
               key={item.id}
               className="flex gap-4 md:gap-6 relative z-10 animate-[slideUp_.6s_ease-out_forwards]"
@@ -194,6 +209,14 @@ export function Recordatorios() {
                     className="flex-1 border border-[#2E7D32]/40 text-[#2E7D32] py-3 rounded-2xl flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#2E7D32]/10"
                   >
                     <Pencil size={19} /> Editar horario
+                  </button>
+
+                  <button
+                    onClick={() => posponer(item)}
+                    disabled={guardando}
+                    className="flex-1 border border-[#B7D8B9] bg-[#F7FBF7] text-[#2E7D32] py-3 rounded-2xl flex items-center justify-center gap-2 transition-all duration-300 hover:bg-[#E8F5E9] disabled:opacity-50"
+                  >
+                    <AlarmClockPlus size={19} /> Posponer 10 min
                   </button>
                 </div>
               </div>

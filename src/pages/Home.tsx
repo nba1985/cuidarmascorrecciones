@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import pastillasIcon from "../assets/svg/pastillas.png";
 import recetaIcon from "../assets/svg/receta.svg";
@@ -11,9 +12,12 @@ import {
   obtenerUsuarios,
   type MedicamentoApi,
   type RecordatorioApi,
+  type RegistroTomaApi,
   type UsuarioApi,
 } from "../services/api";
 import { minutosHastaHorario, puedeConfirmarHorario, textoVentanaConfirmacion } from "../utils/horarios";
+import { Button, Modal } from "../components/ui";
+import { obtenerSeguimientos } from "../utils/seguimientoMedicamentos";
 
 export function Home() {
   const navigate = useNavigate();
@@ -23,6 +27,10 @@ export function Home() {
   const [recordatorios, setRecordatorios] = useState<RecordatorioApi[]>([]);
   const [tomasCompletadas, setTomasCompletadas] = useState(0);
   const [recordatoriosConfirmadosHoy, setRecordatoriosConfirmadosHoy] = useState<Set<number>>(new Set());
+  const [mostrarOmitir, setMostrarOmitir] = useState(false);
+  const [motivoOmision, setMotivoOmision] = useState("");
+  const [guardandoOmision, setGuardandoOmision] = useState(false);
+  const [registrosTomas, setRegistrosTomas] = useState<RegistroTomaApi[]>([]);
   const [error, setError] = useState("");
   const [reloj, setReloj] = useState(0);
 
@@ -49,6 +57,7 @@ export function Home() {
       }
 
       if (tomasResult.status === "fulfilled") {
+        setRegistrosTomas(tomasResult.value);
         const hoy = new Date().toDateString();
         const confirmados = new Set(
           tomasResult.value
@@ -117,6 +126,36 @@ export function Home() {
         minute: "2-digit",
       }).format(new Date(proximoRecordatorio.fechaHoraProgramada))
     : "--:--";
+  const alertas = useMemo(() => {
+    const desde = new Date();
+    desde.setDate(desde.getDate() - 7);
+    const omitidasRecientes = registrosTomas.filter((toma) => !toma.estado && new Date(toma.fechaHoraReal) >= desde).length;
+    const pausados = medicamentos.filter((medicamento) => medicamento.pausado).length;
+    const sinHorario = medicamentos.filter((medicamento) => !medicamento.pausado && medicamento.horarios.length === 0).length;
+    const seguimiento = obtenerSeguimientos();
+    const hoy = new Date();
+    const enDias = (fecha?: string) => fecha ? Math.ceil((+new Date(`${fecha}T23:59:59`) - +hoy) / 86_400_000) : null;
+    const alertasPlanificacion = medicamentos.flatMap((medicamento) => {
+      const datos = seguimiento[medicamento.idMedicamento];
+      if (!datos) return [];
+      const mensajes: string[] = [];
+      if (datos.stock !== undefined && datos.stock <= 5) mensajes.push(`${medicamento.nombre}: quedan ${datos.stock} dosis.`);
+      const diasFin = enDias(datos.fechaFin);
+      if (diasFin !== null && diasFin >= 0 && diasFin <= 7) mensajes.push(`${medicamento.nombre}: el tratamiento finaliza ${diasFin === 0 ? "hoy" : `en ${diasFin} días`}.`);
+      const diasReceta = enDias(datos.vencimientoReceta);
+      if (diasReceta !== null && diasReceta < 0) mensajes.push(`${medicamento.nombre}: la receta está vencida.`);
+      else if (diasReceta !== null && diasReceta <= 15) mensajes.push(`${medicamento.nombre}: la receta vence ${diasReceta === 0 ? "hoy" : `en ${diasReceta} días`}.`);
+      const diasReanudacion = enDias(datos.reanudarEl);
+      if (medicamento.pausado && diasReanudacion !== null && diasReanudacion <= 0) mensajes.push(`${medicamento.nombre}: ya corresponde reanudar el tratamiento.`);
+      return mensajes;
+    });
+    return [
+      pausados ? `${pausados} ${pausados === 1 ? "tratamiento está pausado" : "tratamientos están pausados"}.` : "",
+      sinHorario ? `${sinHorario} ${sinHorario === 1 ? "medicamento no tiene horario activo" : "medicamentos no tienen horario activo"}.` : "",
+      omitidasRecientes ? `Registraste ${omitidasRecientes} ${omitidasRecientes === 1 ? "omisión" : "omisiones"} en los últimos 7 días.` : "",
+      ...alertasPlanificacion,
+    ].filter(Boolean);
+  }, [medicamentos, registrosTomas]);
 
   async function confirmarProximaDosis() {
     if (!proximoRecordatorio) {
@@ -135,16 +174,39 @@ export function Home() {
     }
 
     try {
-      await crearRegistroToma({
+      const registro = await crearRegistroToma({
         estado: true,
         fechaHoraReal: new Date().toISOString(),
         observaciones: "Dosis confirmada",
         idRecordatorio: proximoRecordatorio.idRecordatorio,
         idHistorialAnimo: null,
       });
-      navigate("/app/historial-animo");
+      navigate("/app/historial-animo", {
+        state: { idRegistroToma: registro.idRegistroToma },
+      });
     } catch (err) {
       alert(err instanceof Error ? err.message : "No se pudo confirmar la dosis.");
+    }
+  }
+
+  async function omitirProximaDosis() {
+    if (!proximoRecordatorio || esDosisManana) return;
+    setGuardandoOmision(true);
+    try {
+      const registro = await crearRegistroToma({
+        estado: false,
+        fechaHoraReal: new Date().toISOString(),
+        observaciones: motivoOmision.trim() || "Dosis omitida",
+        idRecordatorio: proximoRecordatorio.idRecordatorio,
+        idHistorialAnimo: null,
+      });
+      setMostrarOmitir(false);
+      setMotivoOmision("");
+      navigate("/app/historial-animo", { state: { idRegistroToma: registro.idRegistroToma } });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "No se pudo registrar la omisión.");
+    } finally {
+      setGuardandoOmision(false);
     }
   }
 
@@ -355,6 +417,9 @@ export function Home() {
               </button>
 
               <button
+                type="button"
+                onClick={() => setMostrarOmitir(true)}
+                disabled={!proximoRecordatorio || esDosisManana || !puedeConfirmarHorario(proximoRecordatorio?.fechaHoraProgramada)}
                 className="
                   secondary-button
 
@@ -369,6 +434,7 @@ export function Home() {
                   md:py-4
 
                   rounded-2xl
+                  disabled:cursor-not-allowed disabled:opacity-50
                 "
               >
                 Omitir
@@ -501,7 +567,16 @@ export function Home() {
 
           </div>
 
-        </div>        {/* ACCESOS RÁPIDOS */}
+        </div>
+
+        {alertas.length > 0 && <section className="mt-7 rounded-3xl border border-[#F1D5A8] bg-[#FFF8E1] p-5 sm:p-6" aria-label="Alertas de tratamiento">
+          <div className="flex items-start gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-[#B45309]"><AlertTriangle size={21} /></span>
+            <div><h3 className="text-lg font-bold text-[#7C3E00]">Atención a tu tratamiento</h3><ul className="mt-2 space-y-1 text-sm text-[#6B4B24]">{alertas.map((alerta) => <li key={alerta}>• {alerta}</li>)}</ul></div>
+          </div>
+        </section>}
+
+        {/* ACCESOS RÁPIDOS */}
 
         <section className="hidden md:block mt-14 pb-8">
 
@@ -688,6 +763,18 @@ export function Home() {
           </div>
 
         </section>      </div>
+
+      <Modal open={mostrarOmitir} title="Omitir esta dosis" onClose={() => !guardandoOmision && setMostrarOmitir(false)}>
+        <p className="mt-3 text-[#747970]">La dosis quedará registrada como omitida. Si querés, contanos el motivo.</p>
+        <label className="mt-5 grid gap-2 text-sm font-semibold">
+          Motivo (opcional)
+          <textarea value={motivoOmision} onChange={(event) => setMotivoOmision(event.target.value)} maxLength={250} rows={3} placeholder="Por ejemplo: estaba fuera de casa" className="rounded-2xl border border-gray-300 p-3 font-normal outline-none focus:border-[#2E7D32] focus:ring-4 focus:ring-[#2E7D32]/10" />
+        </label>
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row">
+          <Button type="button" onClick={() => setMostrarOmitir(false)} disabled={guardandoOmision} className="flex-1 border border-gray-300 py-3">Cancelar</Button>
+          <Button type="button" onClick={omitirProximaDosis} loading={guardandoOmision} className="flex-1 bg-[#B45309] py-3 text-white">Registrar omisión</Button>
+        </div>
+      </Modal>
 
       <style>{`
         @keyframes pageAppear {

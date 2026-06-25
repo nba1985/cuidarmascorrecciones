@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   asociarMedicamentoUsuario,
   actualizarMedicamento,
@@ -63,6 +63,7 @@ export function Medicamentos() {
   const [formData, setFormData] = useState(formInicial);
   const [, setReloj] = useState(Date.now());
   const [eliminandoId, setEliminandoId] = useState<number | null>(null);
+  const [busqueda, setBusqueda] = useState("");
 
   useEffect(() => {
     cargarMedicamentos();
@@ -265,8 +266,12 @@ export function Medicamentos() {
             </button>
           </div>
 
-          <div className="mt-10 flex flex-col gap-5">
-            {medicamentos.map((medicamento, index) => (
+          <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
+            <input type="search" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} placeholder="Buscar por nombre, dosis o indicación..." aria-label="Buscar medicamentos" className="w-full rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E7D32]/20" />
+          </div>
+
+          <div className="mt-5 flex flex-col gap-5">
+            {medicamentos.filter((item) => `${item.nombre} ${item.dosis} ${item.indicaciones}`.toLocaleLowerCase("es-AR").includes(busqueda.toLocaleLowerCase("es-AR"))).map((medicamento, index) => (
               <div
                 key={medicamento.id}
                 className="group bg-white border border-gray-200 rounded-3xl p-6 shadow-sm opacity-0 animate-[slideUp_.6s_ease-out_forwards] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
@@ -306,6 +311,12 @@ export function Medicamentos() {
                   </div>
 
                   <div className="flex flex-col gap-3">
+                    <Link
+                      to={`/app/medicamentos/${medicamento.id}`}
+                      className="border border-[#B7D8B9] bg-[#F7FBF7] px-6 py-3 text-center font-semibold text-[#2E7D32] rounded-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E8F5E9] active:scale-[0.98]"
+                    >
+                      Ver detalle
+                    </Link>
                     <button
                       onClick={() => confirmarToma(medicamento)}
                       disabled={!medicamento.horarios.some((item) => puedeConfirmarHorario(item.hora))}

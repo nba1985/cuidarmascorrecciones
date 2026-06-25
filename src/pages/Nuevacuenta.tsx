@@ -19,15 +19,17 @@ export function Nuevacuenta() {
     numeroPoliza: "",
     alergia: "",
     condicion: "",
-    tipoTelefono: "",
+    tipoTelefono: "Celular",
     telefono: "",
     contactoEmergencia: "",
     parentesco: "",
+    telefonoEmergencia: "",
   });
   const [error, setError] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [fotoArchivo, setFotoArchivo] = useState<Blob | null>(null);
   const [fotoPreview, setFotoPreview] = useState("");
+  const [erroresCampos, setErroresCampos] = useState<Record<string, string>>({});
 
   useEffect(() => {
     return () => {
@@ -35,11 +37,12 @@ export function Nuevacuenta() {
     };
   }, [fotoPreview]);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    setErroresCampos((actuales) => ({ ...actuales, [e.target.name]: "" }));
   }
 
   async function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -66,8 +69,17 @@ export function Nuevacuenta() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmarPassword) {
-      setError("Las contraseñas no coinciden.");
+    const errores: Record<string, string> = {};
+    if (!formData.nombre.trim()) errores.nombre = "Ingresá tu nombre.";
+    if (!formData.apellido.trim()) errores.apellido = "Ingresá tu apellido.";
+    if (!/^\S+@\S+\.\S+$/.test(formData.mail)) errores.mail = "Ingresá un correo electrónico válido.";
+    if (formData.dni && !/^\d{7,9}$/.test(formData.dni)) errores.dni = "El DNI debe tener entre 7 y 9 números.";
+    if (formData.fechaNacimiento && new Date(`${formData.fechaNacimiento}T00:00:00`) > new Date()) errores.fechaNacimiento = "La fecha no puede ser futura.";
+    if (formData.password.length < 4) errores.password = "Usá al menos 4 caracteres.";
+    if (formData.password !== formData.confirmarPassword) errores.confirmarPassword = "Las contraseñas no coinciden.";
+    setErroresCampos(errores);
+    if (Object.keys(errores).length > 0) {
+      setError("Revisá los campos marcados antes de continuar.");
       return;
     }
 
@@ -93,6 +105,7 @@ export function Nuevacuenta() {
         telefono: formData.telefono || null,
         contactoEmergencia: formData.contactoEmergencia || null,
         parentesco: formData.parentesco || null,
+        telefonoEmergencia: formData.telefonoEmergencia || null,
       });
 
       let usuarioRegistrado = response.usuario;
@@ -174,6 +187,7 @@ export function Nuevacuenta() {
                 className="w-full outline-none bg-transparent text-sm sm:text-base"
               />
             </div>
+            {erroresCampos.mail && <p role="alert" className="-mt-2 text-sm text-red-600">{erroresCampos.mail}</p>}
 
             <h2 className="text-lg font-bold text-[#0F172A] mt-2">Información personal adicional</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -273,13 +287,17 @@ export function Nuevacuenta() {
                 placeholder="Condición"
                 className="bg-white border border-gray-300 rounded-2xl px-4 py-3 outline-none focus:border-[#067A34] focus:ring-4 focus:ring-[#067A34]/10"
               />
-              <input
+              <select
                 name="tipoTelefono"
                 value={formData.tipoTelefono}
                 onChange={handleChange}
-                placeholder="Tipo teléfono"
                 className="bg-white border border-gray-300 rounded-2xl px-4 py-3 outline-none focus:border-[#067A34] focus:ring-4 focus:ring-[#067A34]/10"
-              />
+              >
+                <option value="Celular">Celular</option>
+                <option value="Fijo">Fijo</option>
+                <option value="Trabajo">Trabajo</option>
+                <option value="WhatsApp">WhatsApp</option>
+              </select>
               <input
                 name="telefono"
                 value={formData.telefono}
@@ -292,6 +310,7 @@ export function Nuevacuenta() {
                 value={formData.contactoEmergencia}
                 onChange={handleChange}
                 placeholder="Contacto emergencia"
+                required
                 className="bg-white border border-gray-300 rounded-2xl px-4 py-3 outline-none focus:border-[#067A34] focus:ring-4 focus:ring-[#067A34]/10"
               />
               <input
@@ -299,6 +318,15 @@ export function Nuevacuenta() {
                 value={formData.parentesco}
                 onChange={handleChange}
                 placeholder="Parentesco"
+                required
+                className="bg-white border border-gray-300 rounded-2xl px-4 py-3 outline-none focus:border-[#067A34] focus:ring-4 focus:ring-[#067A34]/10"
+              />
+              <input
+                name="telefonoEmergencia"
+                value={formData.telefonoEmergencia}
+                onChange={handleChange}
+                placeholder="Teléfono del contacto de emergencia"
+                required
                 className="bg-white border border-gray-300 rounded-2xl px-4 py-3 outline-none focus:border-[#067A34] focus:ring-4 focus:ring-[#067A34]/10"
               />
             </div>
@@ -317,6 +345,7 @@ export function Nuevacuenta() {
                 className="w-full outline-none bg-transparent text-sm sm:text-base"
               />
             </div>
+            {erroresCampos.password && <p role="alert" className="-mt-2 text-sm text-red-600">{erroresCampos.password}</p>}
 
             <div className="flex items-center bg-white border border-gray-300 rounded-2xl px-4 py-3 focus-within:border-[#067A34] focus-within:ring-4 focus-within:ring-[#067A34]/10">
               <Lock className="text-gray-500 mr-3" size={20} />
@@ -331,6 +360,7 @@ export function Nuevacuenta() {
                 className="w-full outline-none bg-transparent text-sm sm:text-base"
               />
             </div>
+            {erroresCampos.confirmarPassword && <p role="alert" className="-mt-2 text-sm text-red-600">{erroresCampos.confirmarPassword}</p>}
 
             <button
               type="submit"

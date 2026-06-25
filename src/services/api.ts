@@ -6,6 +6,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   try {
     response = await fetch(`${API_URL}${path}`, {
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...options?.headers,
@@ -51,6 +52,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export interface MedicamentoApi {
   idMedicamento: number;
+  idTratamiento?: number | null;
   nombre: string;
   descripcion: string | null;
   presentacion: string | null;
@@ -59,6 +61,7 @@ export interface MedicamentoApi {
   idRecordatorio: number | null;
   frecuenciaHoras: number | null;
   horarios: Array<{ hora: string; idRecordatorio: number | null }>;
+  pausado?: boolean;
 }
 
 export interface RecordatorioApi {
@@ -139,6 +142,7 @@ export interface PerfilUsuarioApi {
   telefono: string | null;
   contactoEmergencia: string | null;
   parentesco: string | null;
+  telefonoEmergencia: string | null;
   foto: string | null;
 }
 
@@ -159,6 +163,7 @@ export interface PerfilGuardarApi {
   telefono?: string | null;
   contactoEmergencia?: string | null;
   parentesco?: string | null;
+  telefonoEmergencia?: string | null;
 }
 
 export interface GrupoSanguineoApi {
@@ -228,6 +233,13 @@ export function eliminarMedicamento(id: number, idUsuario?: number) {
   });
 }
 
+export function cambiarPausaTratamiento(idTratamiento: number, idUsuario: number, pausado: boolean) {
+  return request<void>(`/Medicamentos/tratamiento/${idTratamiento}/pausa?idUsuario=${idUsuario}`, {
+    method: "PUT",
+    body: JSON.stringify({ pausado }),
+  });
+}
+
 export function obtenerRecordatorios() {
   return request<RecordatorioApi[]>("/Recordatorios");
 }
@@ -257,6 +269,12 @@ export function actualizarRecordatorio(id: number, recordatorio: {
   });
 }
 
+export function posponerRecordatorio(id: number, minutos = 10) {
+  return request<RecordatorioApi>(`/Recordatorios/${id}/posponer?minutos=${minutos}`, {
+    method: "POST",
+  });
+}
+
 export function obtenerRecetas(idUsuario?: number) {
   const query = idUsuario ? `?idUsuario=${idUsuario}` : "";
   return request<RecetaApi[]>(`/Recetas${query}`);
@@ -277,7 +295,7 @@ export function crearReceta(receta: {
 export async function subirArchivoReceta(archivo: File) {
   const formData = new FormData();
   formData.append("archivo", archivo, archivo.name);
-  const response = await fetch(`${API_URL}/Recetas/archivo`, { method: "POST", body: formData });
+  const response = await fetch(`${API_URL}/Recetas/archivo`, { method: "POST", credentials: "include", body: formData });
   if (!response.ok) throw new Error((await response.text()) || "No se pudo subir el archivo de receta.");
   return response.json() as Promise<{ ruta: string; nombreOriginal: string }>;
 }
@@ -346,11 +364,16 @@ export function crearHistorialAnimo(historial: {
   observaciones: string;
   idUsuario: number | null;
   idEstado: number | null;
+  idRegistroToma?: number | null;
 }) {
   return request<HistorialAnimoApi>("/HistorialesAnimo", {
     method: "POST",
     body: JSON.stringify(historial),
   });
+}
+
+export function cerrarSesionApi() {
+  return request<void>("/Auth/logout", { method: "POST" });
 }
 
 export function obtenerUsuarios() {
@@ -397,6 +420,7 @@ export async function subirFotoPerfil(idUsuario: number, archivo: Blob) {
 
   const response = await fetch(`${API_URL}/Usuarios/${idUsuario}/foto`, {
     method: "POST",
+    credentials: "include",
     body: formData,
   });
 

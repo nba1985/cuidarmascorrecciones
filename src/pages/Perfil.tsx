@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MapPin } from "lucide-react";
 import {
   actualizarPerfilCompleto,
+  cerrarSesionApi,
   obtenerPerfilUsuario,
   obtenerUsuarios,
   resolverUrlArchivo,
@@ -25,8 +27,9 @@ const formInicial = {
   condicion: "",
   tipoTelefono: "",
   telefono: "",
-  contactoEmergencia: "",
-  parentesco: "",
+    contactoEmergencia: "",
+    parentesco: "",
+    telefonoEmergencia: "",
 };
 
 export function Perfil() {
@@ -80,13 +83,19 @@ export function Perfil() {
       telefono: perfil?.telefono ?? "Sin teléfono",
       contactoEmergencia: perfil?.contactoEmergencia ?? "Sin contacto",
       parentesco: perfil?.parentesco ?? "Sin parentesco",
+      telefonoEmergencia: perfil?.telefonoEmergencia ?? "Sin teléfono cargado",
       foto:
         resolverUrlArchivo(usuarioApi?.foto) ||
         "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
     };
   }, [perfil, usuarioApi]);
 
-  const cerrarSesion = () => {
+  const cerrarSesion = async () => {
+    try {
+      await cerrarSesionApi();
+    } catch {
+      // La limpieza local igualmente cierra la interfaz si la API no responde.
+    }
     localStorage.clear();
     sessionStorage.clear();
     navigate("/");
@@ -112,6 +121,7 @@ export function Perfil() {
       telefono: perfil?.telefono === "Sin teléfono" ? "" : perfil?.telefono ?? "",
       contactoEmergencia: perfil?.contactoEmergencia === "Sin contacto" ? "" : perfil?.contactoEmergencia ?? "",
       parentesco: perfil?.parentesco === "Sin parentesco" ? "" : perfil?.parentesco ?? "",
+      telefonoEmergencia: perfil?.telefonoEmergencia ?? "",
     });
     setFotoArchivo(null);
     setFotoPreview("");
@@ -171,6 +181,7 @@ export function Perfil() {
         telefono: formData.telefono || null,
         contactoEmergencia: formData.contactoEmergencia || null,
         parentesco: formData.parentesco || null,
+        telefonoEmergencia: formData.telefonoEmergencia || null,
       });
       setUsuarioApi(actualizado);
       localStorage.setItem("cuidarPlusUsuario", JSON.stringify(actualizado));
@@ -189,11 +200,11 @@ export function Perfil() {
 
   return (
     <>
-      <section className="min-h-screen bg-[#F5F5F5] text-[#212121] px-4 py-6 animate-[pageAppear_.35s_ease-out]">
-        <div className="max-w-6xl mx-auto">
+      <section className="min-h-screen max-w-full overflow-x-clip bg-[#F5F5F5] text-[#212121] px-1 sm:px-4 py-6 animate-[pageAppear_.35s_ease-out]">
+        <div className="max-w-6xl min-w-0 mx-auto">
           {error && <p className="text-red-600 mb-4">{error}</p>}
 
-          <div className="grid lg:grid-cols-[340px_1fr] gap-6 mt-6 lg:mt-10">
+          <div className="grid min-w-0 lg:grid-cols-[340px_minmax(0,1fr)] gap-6 mt-6 lg:mt-10">
             <aside className="profile-card bg-white rounded-[28px] border border-gray-200 shadow-sm p-6 h-fit">
               <img
                 src={paciente.foto}
@@ -220,9 +231,17 @@ export function Perfil() {
                 </div>
               </div>
 
+              <div className="mt-6 border-t border-gray-200 pt-5">
+                <p className="text-sm text-[#747970]">Dirección particular</p>
+                <div className="mt-2 flex items-start gap-2 text-left">
+                  <MapPin size={20} className="mt-0.5 shrink-0 text-[#2E7D32]" aria-hidden="true" />
+                  <p className="font-bold leading-snug [overflow-wrap:anywhere]">{paciente.direccion}</p>
+                </div>
+              </div>
+
               <button
                 onClick={abrirEdicion}
-                className="w-full mt-8 bg-[#2E7D32] text-white rounded-2xl py-4 font-bold text-base shadow-sm"
+                className="w-full mt-6 bg-[#2E7D32] text-white rounded-2xl py-4 font-bold text-base shadow-sm"
               >
                 Editar perfil
               </button>
@@ -235,32 +254,34 @@ export function Perfil() {
               </button>
             </aside>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="profile-card bg-white rounded-[28px] p-7 border border-gray-200 shadow-sm">
-                <p className="text-[#747970] text-base">Grupo sanguíneo</p>
-                <h2 className="text-5xl font-bold tracking-tight mt-5 text-[#2E7D32]">
-                  {paciente.sangre}
-                </h2>
-                <p className="text-[#747970] mt-4 text-base">Dato clínico principal</p>
+            <div className="grid min-w-0 md:grid-cols-2 gap-6">
+              <div className="profile-card md:col-span-2 bg-white rounded-[28px] p-7 border border-gray-200 shadow-sm">
+                <p className="text-[#747970] text-base">Información para emergencias</p>
+                <div className="mt-5 grid gap-5 sm:grid-cols-3">
+                  <div className="rounded-2xl bg-[#F7FBF7] p-5">
+                    <p className="text-sm font-semibold text-[#386641]">Grupo sanguíneo</p>
+                    <h2 className="mt-2 text-5xl font-bold tracking-tight text-[#2E7D32]">{paciente.sangre}</h2>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 p-5">
+                    <p className="text-sm font-semibold text-[#747970]">Alergias</p>
+                    <h2 className="mt-2 text-xl font-bold">{paciente.alergia}</h2>
+                  </div>
+                  <div className="rounded-2xl border border-gray-100 p-5">
+                    <p className="text-sm font-semibold text-[#747970]">Condiciones</p>
+                    <h2 className="mt-2 text-xl font-bold">{paciente.condicion}</h2>
+                  </div>
+                </div>
               </div>
 
               <div className="profile-card bg-white rounded-[28px] p-7 border border-gray-200 shadow-sm">
                 <p className="text-[#747970] text-base">Contacto</p>
-                <h2 className="text-2xl font-bold tracking-tight mt-5 break-words">
+                <h2 className="max-w-full text-2xl font-bold tracking-tight mt-5 [overflow-wrap:anywhere]">
                   {paciente.contacto}
                 </h2>
                 <p className="text-[#747970] mt-3">DNI: {paciente.dni}</p>
                 <p className="text-[#747970] mt-2">
                   {paciente.tipoTelefono}: {paciente.telefono}
                 </p>
-                <div className="flex gap-4 mt-7">
-                  <button className="flex-1 bg-[#2E7D32] text-white rounded-2xl py-3 font-semibold">
-                    Llamar
-                  </button>
-                  <button className="flex-1 bg-[#F5F5F5] border border-gray-200 rounded-2xl py-3 font-semibold">
-                    SMS
-                  </button>
-                </div>
               </div>
 
               <div className="profile-card bg-white rounded-[28px] p-7 border border-gray-200 shadow-sm">
@@ -269,28 +290,14 @@ export function Perfil() {
                 <p className="text-[#747970] mt-3 text-base">Número de socio: {paciente.numeroPoliza}</p>
               </div>
 
-              <div className="profile-card bg-white rounded-[28px] p-7 border border-gray-200 shadow-sm">
-                <p className="text-[#747970] text-base">Dirección particular</p>
-                <h2 className="text-3xl font-bold tracking-tight mt-5 leading-snug">
-                  {paciente.direccion}
-                </h2>
-                <button className="mt-6 text-[#2E7D32] font-semibold hover:underline">
-                  Ver en el mapa
-                </button>
-              </div>
-
-              <div className="profile-card bg-white rounded-[28px] p-7 border border-gray-200 shadow-sm">
-                <p className="text-[#747970] text-base">Antecedentes</p>
-                <h2 className="text-2xl font-bold mt-5 tracking-tight">Alergia</h2>
-                <p className="text-[#747970] mt-2">{paciente.alergia}</p>
-                <h2 className="text-2xl font-bold mt-5 tracking-tight">Condición</h2>
-                <p className="text-[#747970] mt-2">{paciente.condicion}</p>
-              </div>
-
-              <div className="profile-card bg-white rounded-[28px] p-7 border border-gray-200 shadow-sm">
-                <p className="text-[#747970] text-base">Contacto de emergencia</p>
-                <h2 className="text-2xl font-bold mt-5 tracking-tight">{paciente.contactoEmergencia}</h2>
-                <p className="text-[#747970] mt-3">Parentesco: {paciente.parentesco}</p>
+              <div className="profile-card md:col-span-2 bg-white rounded-[28px] p-7 border border-gray-200 shadow-sm md:flex md:items-center md:justify-between md:gap-6">
+                <div>
+                  <p className="text-[#747970] text-base">Contacto de emergencia</p>
+                  <h2 className="text-2xl font-bold mt-4 tracking-tight">{paciente.contactoEmergencia}</h2>
+                  <p className="text-[#747970] mt-3">Parentesco: {paciente.parentesco}</p>
+                  <p className="text-[#747970] mt-2">Teléfono: {paciente.telefonoEmergencia}</p>
+                </div>
+                {perfil?.telefonoEmergencia && <a href={`tel:${perfil.telefonoEmergencia}`} className="mt-5 inline-flex shrink-0 rounded-2xl bg-[#2E7D32] px-5 py-3 font-semibold text-white md:mt-0">Llamar al contacto</a>}
               </div>
             </div>
           </div>
@@ -400,12 +407,17 @@ export function Perfil() {
                 placeholder="Condición"
                 className="border border-gray-300 rounded-2xl p-4 outline-none focus:border-[#2E7D32]"
               />
-              <input
+              <select
                 value={formData.tipoTelefono}
                 onChange={(e) => setFormData({ ...formData, tipoTelefono: e.target.value })}
-                placeholder="Tipo de teléfono"
                 className="border border-gray-300 rounded-2xl p-4 outline-none focus:border-[#2E7D32]"
-              />
+              >
+                <option value="">Seleccioná el tipo de teléfono</option>
+                <option value="Celular">Celular</option>
+                <option value="Fijo">Fijo</option>
+                <option value="Trabajo">Trabajo</option>
+                <option value="WhatsApp">WhatsApp</option>
+              </select>
               <input
                 value={formData.telefono}
                 onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
@@ -416,12 +428,22 @@ export function Perfil() {
                 value={formData.contactoEmergencia}
                 onChange={(e) => setFormData({ ...formData, contactoEmergencia: e.target.value })}
                 placeholder="Contacto de emergencia"
+                required
                 className="border border-gray-300 rounded-2xl p-4 outline-none focus:border-[#2E7D32]"
               />
               <input
                 value={formData.parentesco}
                 onChange={(e) => setFormData({ ...formData, parentesco: e.target.value })}
                 placeholder="Parentesco"
+                required
+                className="border border-gray-300 rounded-2xl p-4 outline-none focus:border-[#2E7D32]"
+              />
+              <input
+                type="tel"
+                value={formData.telefonoEmergencia}
+                onChange={(e) => setFormData({ ...formData, telefonoEmergencia: e.target.value })}
+                placeholder="Teléfono del contacto de emergencia"
+                required
                 className="border border-gray-300 rounded-2xl p-4 outline-none focus:border-[#2E7D32]"
               />
             </div>

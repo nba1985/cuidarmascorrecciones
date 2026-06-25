@@ -1,5 +1,10 @@
 @import "tailwindcss";
+html, body, #root { width: 100%; max-width: 100%; overflow-x: clip; }
+img, svg, video, canvas { max-width: 100%; }
+.profile-card { min-width: 0; overflow-wrap: anywhere; }
 *:focus-visible { outline: 3px solid rgba(46, 125, 50, .45); outline-offset: 3px; }
 button, a, input, select, textarea { touch-action: manipulation; }
 @media (max-width: 420px) { [role="dialog"] { max-height: 94vh; border-radius: 1.5rem 1.5rem 0 0; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+.texto-grande { font-size: 112.5%; }
+.texto-grande button, .texto-grande input, .texto-grande select, .texto-grande textarea { min-height: 2.75rem; }

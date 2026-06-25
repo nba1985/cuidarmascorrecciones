@@ -1,10 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { Bell, BellRing, Volume2 } from "lucide-react";
-import { obtenerRecordatoriosUsuario, type RecordatorioApi, type UsuarioApi } from "../services/api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Bell, BellRing, Check, Play, Volume2 } from "lucide-react";
+import { obtenerRecordatoriosUsuario, posponerRecordatorio, type RecordatorioApi, type UsuarioApi } from "../services/api";
 import { minutosHastaHorario } from "../utils/horarios";
 
 const RINGTONES = ["Chirp.mp3", "Arpeggio.mp3", "Departure.mp3", "Chalet.mp3", "Journey.mp3"] as const;
 type Ringtone = (typeof RINGTONES)[number];
+
+function ringtoneInicial(): Ringtone {
+  const guardado = localStorage.getItem("cuidarPlusRingtone");
+  return RINGTONES.includes(guardado as Ringtone) ? (guardado as Ringtone) : "Chirp.mp3";
+}
 
 export function RecordatorioAlarma() {
   const [activo, setActivo] = useState<RecordatorioApi | null>(null);
@@ -12,105 +17,34 @@ export function RecordatorioAlarma() {
     typeof Notification === "undefined" ? "denied" : Notification.permission
   );
   const [configuracionAbierta, setConfiguracionAbierta] = useState(false);
-  const [ringtoneSeleccionado, setRingtoneSeleccionado] = useState<Ringtone>(() => {
-    const guardado = localStorage.getItem("cuidarPlusRingtone");
-    return RINGTONES.includes(guardado as Ringtone) ? (guardado as Ringtone) : "Chirp.mp3";
-  });
+  const [ringtoneGuardado, setRingtoneGuardado] = useState<Ringtone>(ringtoneInicial);
+  const [ringtoneSeleccionado, setRingtoneSeleccionado] = useState<Ringtone>(ringtoneInicial);
+  const [probando, setProbando] = useState<Ringtone | null>(null);
+  const [posponiendo, setPosponiendo] = useState(false);
   const audioRef = useRef<AudioContext | null>(null);
   const ringtoneRef = useRef<HTMLAudioElement | null>(null);
   const intervaloSonidoRef = useRef<number | null>(null);
   const revisandoRef = useRef(false);
 
-  useEffect(() => {
-    revisarRecordatorios();
-    const intervalo = window.setInterval(revisarRecordatorios, 30_000);
-    return () => window.clearInterval(intervalo);
+  const detenerSonido = useCallback(() => {
+    if (ringtoneRef.current) {
+      ringtoneRef.current.pause();
+      ringtoneRef.current.currentTime = 0;
+    }
+    if (intervaloSonidoRef.current !== null) {
+      window.clearInterval(intervaloSonidoRef.current);
+      intervaloSonidoRef.current = null;
+    }
   }, []);
 
-  useEffect(() => {
-    if (!activo) {
-      detenerSonido();
-      return;
-    }
-
-    void reproducirRingtone();
-    return detenerSonido;
-  }, [activo]);
-
-  async function activarAvisos() {
-    if (!("Notification" in window) || !("serviceWorker" in navigator)) {
-      alert("Este navegador no admite notificaciones de la aplicación.");
-      return;
-    }
-
-    audioRef.current ??= new AudioContext();
-    await audioRef.current.resume();
-    await reproducirRingtone(true);
-    const resultado = await Notification.requestPermission();
-    setPermiso(resultado);
-
-    if (resultado === "granted") {
-      localStorage.setItem("cuidarPlusAvisosActivados", "1");
-      localStorage.setItem("cuidarPlusRingtone", ringtoneSeleccionado);
-      setConfiguracionAbierta(false);
-      alert("Recordatorios activados. El tono que escuchaste es el sonido de prueba.");
-    }
-  }
-
-  async function revisarRecordatorios() {
-    if (revisandoRef.current) return;
-
-    const guardado = localStorage.getItem("cuidarPlusUsuario");
-    const usuario = guardado ? (JSON.parse(guardado) as UsuarioApi) : null;
-    if (!usuario?.idUsuario) return;
-
-    revisandoRef.current = true;
-    try {
-      const recordatorios = await obtenerRecordatoriosUsuario(usuario.idUsuario);
-      const encontrado = recordatorios.find((recordatorio) => {
-        const diferencia = minutosHastaHorario(recordatorio.fechaHoraProgramada);
-        // Tolera pestañas en segundo plano o equipos suspendidos sin disparar
-        // recordatorios futuros antes de tiempo.
-        if (diferencia === null || diferencia > 1 || diferencia < -5) return false;
-
-        const clave = claveAviso(recordatorio);
-        return !localStorage.getItem(clave);
-      });
-
-      if (!encontrado) return;
-
-      // La clave incluye el horario: si el usuario lo cambia, el nuevo aviso no
-      // queda bloqueado por una alarma anterior del mismo día.
-      localStorage.setItem(claveAviso(encontrado), "1");
-      setActivo(encontrado);
-
-      if (Notification.permission === "granted") {
-        const registro = await navigator.serviceWorker.ready;
-        await registro.showNotification("Hora de tu medicación", {
-          body: `Es momento de tomar ${encontrado.canal || "tu medicamento"}.`,
-          icon: "/logo%20mas%20ok.png",
-          badge: "/logo%20mas%20ok.png",
-          tag: `recordatorio-${encontrado.idRecordatorio}`,
-          requireInteraction: true,
-        });
-      }
-    } catch {
-      // La alarma vuelve a intentar en la próxima revisión.
-    } finally {
-      revisandoRef.current = false;
-    }
-  }
-
-  async function sonar() {
+  const sonar = useCallback(async () => {
     audioRef.current ??= new AudioContext();
     const contexto = audioRef.current;
-
     try {
       if (contexto.state !== "running") await contexto.resume();
     } catch {
       return;
     }
-
     if (contexto.state !== "running") return;
 
     const oscilador = contexto.createOscillator();
@@ -123,10 +57,10 @@ export function RecordatorioAlarma() {
     ganancia.connect(contexto.destination);
     oscilador.start();
     oscilador.stop(contexto.currentTime + 0.75);
-  }
+  }, []);
 
-  async function reproducirRingtone(prueba = false) {
-    const ruta = `/audio/${encodeURIComponent(ringtoneSeleccionado)}`;
+  const reproducirRingtone = useCallback(async (prueba = false, ringtoneElegido: Ringtone = ringtoneGuardado) => {
+    const ruta = `/audio/${encodeURIComponent(ringtoneElegido)}`;
     if (!ringtoneRef.current || !ringtoneRef.current.src.endsWith(ruta)) {
       detenerSonido();
       ringtoneRef.current = new Audio(ruta);
@@ -146,20 +80,114 @@ export function RecordatorioAlarma() {
       }
     } catch {
       await sonar();
-      if (!prueba) {
-        intervaloSonidoRef.current = window.setInterval(() => void sonar(), 2_500);
+      if (!prueba) intervaloSonidoRef.current = window.setInterval(() => void sonar(), 2_500);
+    }
+  }, [detenerSonido, ringtoneGuardado, sonar]);
+
+  const revisarRecordatorios = useCallback(async () => {
+    if (revisandoRef.current) return;
+    const guardado = localStorage.getItem("cuidarPlusUsuario");
+    const usuario = guardado ? (JSON.parse(guardado) as UsuarioApi) : null;
+    if (!usuario?.idUsuario) return;
+
+    revisandoRef.current = true;
+    try {
+      const recordatorios = await obtenerRecordatoriosUsuario(usuario.idUsuario);
+      const encontrado = recordatorios.find((recordatorio) => {
+        const diferencia = minutosHastaHorario(recordatorio.fechaHoraProgramada);
+        if (diferencia === null || diferencia > 1 || diferencia < -5) return false;
+        return !localStorage.getItem(claveAviso(recordatorio));
+      });
+      if (!encontrado) return;
+
+      localStorage.setItem(claveAviso(encontrado), "1");
+      setActivo(encontrado);
+      if (Notification.permission === "granted") {
+        const registro = await navigator.serviceWorker.ready;
+        await registro.showNotification("Hora de tu medicación", {
+          body: `Es momento de tomar ${encontrado.canal || "tu medicamento"}.`,
+          icon: "/logo%20mas%20ok.png",
+          badge: "/logo%20mas%20ok.png",
+          tag: `recordatorio-${encontrado.idRecordatorio}`,
+          requireInteraction: true,
+        });
       }
+    } catch {
+      // Se vuelve a intentar en la próxima revisión.
+    } finally {
+      revisandoRef.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    const inicio = window.setTimeout(() => void revisarRecordatorios(), 0);
+    const intervalo = window.setInterval(() => void revisarRecordatorios(), 30_000);
+    return () => {
+      window.clearTimeout(inicio);
+      window.clearInterval(intervalo);
+    };
+  }, [revisarRecordatorios]);
+
+  useEffect(() => {
+    if (!activo) {
+      detenerSonido();
+      return;
+    }
+    void reproducirRingtone();
+    return detenerSonido;
+  }, [activo, detenerSonido, reproducirRingtone]);
+
+  async function activarAvisos() {
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) {
+      alert("Este navegador no admite notificaciones de la aplicación.");
+      return;
+    }
+    audioRef.current ??= new AudioContext();
+    await audioRef.current.resume().catch(() => undefined);
+    const resultado = await Notification.requestPermission();
+    setPermiso(resultado);
+    if (resultado === "granted") {
+      localStorage.setItem("cuidarPlusAvisosActivados", "1");
+      alert("Notificaciones activadas correctamente.");
+    } else {
+      alert("El navegador no concedió el permiso. Podés cambiarlo desde la configuración del sitio.");
     }
   }
 
-  function detenerSonido() {
-    if (ringtoneRef.current) {
-      ringtoneRef.current.pause();
-      ringtoneRef.current.currentTime = 0;
-    }
-    if (intervaloSonidoRef.current !== null) {
-      window.clearInterval(intervaloSonidoRef.current);
-      intervaloSonidoRef.current = null;
+  async function probarRingtone(ringtone: Ringtone) {
+    setRingtoneSeleccionado(ringtone);
+    setProbando(ringtone);
+    await reproducirRingtone(true, ringtone);
+    window.setTimeout(() => setProbando((actual) => actual === ringtone ? null : actual), 2_500);
+  }
+
+  function guardarRingtone() {
+    detenerSonido();
+    localStorage.setItem("cuidarPlusRingtone", ringtoneSeleccionado);
+    setRingtoneGuardado(ringtoneSeleccionado);
+    setConfiguracionAbierta(false);
+    alert(`Tono ${nombreRingtone(ringtoneSeleccionado)} guardado.`);
+  }
+
+  function cerrarConfiguracion() {
+    detenerSonido();
+    setProbando(null);
+    setRingtoneSeleccionado(ringtoneGuardado);
+    setConfiguracionAbierta(false);
+  }
+
+  async function posponerAviso() {
+    if (!activo) return;
+    try {
+      setPosponiendo(true);
+      detenerSonido();
+      await posponerRecordatorio(activo.idRecordatorio, 10);
+      setActivo(null);
+    } catch {
+      await reproducirRingtone(false, ringtoneGuardado);
+      alert("No se pudo posponer el aviso. Intentá nuevamente.");
+    } finally {
+      setPosponiendo(false);
     }
   }
 
@@ -167,66 +195,74 @@ export function RecordatorioAlarma() {
     <>
       <button
         type="button"
-        onClick={() => setConfiguracionAbierta(true)}
-        title={permiso === "granted" ? `Ringtone: ${ringtoneSeleccionado.replace(".mp3", "")}` : "Configurar sonido y notificaciones"}
+        onClick={() => {
+          detenerSonido();
+          setRingtoneSeleccionado(ringtoneGuardado);
+          setConfiguracionAbierta(true);
+        }}
+        title={permiso === "granted" ? `Ringtone: ${nombreRingtone(ringtoneGuardado)}` : "Configurar sonido y notificaciones"}
         className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-[#2E7D32] hover:bg-[#2E7D32]/10"
       >
         {permiso === "granted" ? <BellRing size={20} /> : <Bell size={20} />}
       </button>
 
       {configuracionAbierta && (
-        <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white rounded-3xl border border-gray-200 shadow-xl p-7">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-3 sm:p-4">
+          <section role="dialog" aria-modal="true" aria-labelledby="sonido-title" className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl border border-gray-200 bg-white p-5 shadow-xl sm:p-7">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold text-[#2E7D32]">NOTIFICACIONES</p>
-                <h2 className="text-2xl font-bold mt-1">Elegí el ringtone</h2>
+                <h2 id="sonido-title" className="mt-1 text-2xl font-bold">Sonido de recordatorios</h2>
               </div>
-              <button type="button" onClick={() => setConfiguracionAbierta(false)} className="w-10 h-10 rounded-full hover:bg-gray-100" aria-label="Cerrar configuración">×</button>
+              <button type="button" onClick={cerrarConfiguracion} className="h-10 w-10 rounded-full hover:bg-gray-100" aria-label="Cerrar configuración">×</button>
             </div>
 
-            <select
-              value={ringtoneSeleccionado}
-              onChange={(event) => setRingtoneSeleccionado(event.target.value as Ringtone)}
-              className="w-full mt-6 border border-gray-300 rounded-2xl p-4 bg-white outline-none focus:border-[#2E7D32]"
-              aria-label="Ringtone de recordatorios"
-            >
-              {RINGTONES.map((ringtone) => (
-                <option key={ringtone} value={ringtone}>{ringtone.replace(".mp3", "")}</option>
-              ))}
-            </select>
+            <div className={`mt-5 flex flex-col items-start justify-between gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center ${permiso === "granted" ? "border-[#B7D8B9] bg-[#F7FBF7]" : "border-gray-200 bg-gray-50"}`}>
+              <div>
+                <p className="font-semibold">Notificaciones {permiso === "granted" ? "activadas" : "desactivadas"}</p>
+                <p className="mt-1 text-sm text-[#747970]">{permiso === "granted" ? "El navegador mostrará avisos mientras la aplicación esté abierta." : "Activá el permiso para recibir avisos del navegador."}</p>
+              </div>
+              {permiso !== "granted" && <button type="button" onClick={() => void activarAvisos()} className="shrink-0 rounded-xl border border-[#2E7D32] px-3 py-2 text-sm font-semibold text-[#2E7D32]">Activar notificaciones</button>}
+            </div>
 
-            <button type="button" onClick={() => void activarAvisos()} className="w-full mt-5 bg-[#2E7D32] text-white rounded-2xl py-4 font-bold">
-              Guardar, activar y probar
-            </button>
-          </div>
+            <fieldset className="mt-6">
+              <legend className="font-bold">Elegí un tono</legend>
+              <p className="mt-1 text-sm text-[#747970]">Podés escucharlos antes de guardar.</p>
+              <div className="mt-4 grid gap-3">
+                {RINGTONES.map((ringtone) => {
+                  const seleccionado = ringtoneSeleccionado === ringtone;
+                  return (
+                    <div key={ringtone} className={`flex items-center gap-2 rounded-2xl border p-2 transition ${seleccionado ? "border-[#2E7D32] bg-[#F7FBF7] ring-2 ring-[#2E7D32]/10" : "border-gray-200"}`}>
+                      <button type="button" onClick={() => setRingtoneSeleccionado(ringtone)} aria-pressed={seleccionado} className="flex min-w-0 flex-1 items-center gap-3 rounded-xl p-2 text-left">
+                        <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border ${seleccionado ? "border-[#2E7D32] bg-[#2E7D32] text-white" : "border-gray-300"}`}>{seleccionado && <Check size={15} />}</span>
+                        <span className="font-semibold">{nombreRingtone(ringtone)}</span>
+                        {ringtoneGuardado === ringtone && <span className="ml-auto hidden text-xs text-[#747970] sm:inline">Actual</span>}
+                      </button>
+                      <button type="button" onClick={() => void probarRingtone(ringtone)} className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-[#386641] hover:bg-[#E8F5E9]">
+                        <Play size={15} fill="currentColor" /> {probando === ringtone ? "Sonando" : "Escuchar"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </fieldset>
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row">
+              <button type="button" onClick={cerrarConfiguracion} className="flex-1 rounded-2xl border border-gray-300 py-3 font-semibold">Cancelar</button>
+              <button type="button" onClick={guardarRingtone} disabled={ringtoneSeleccionado === ringtoneGuardado} className="flex-1 rounded-2xl bg-[#2E7D32] py-3 font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300">Guardar tono</button>
+            </div>
+          </section>
         </div>
       )}
 
       {activo && (
-        <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white rounded-3xl border border-gray-200 shadow-xl p-7 text-center">
-            <div className="w-16 h-16 mx-auto rounded-full bg-[#2E7D32]/10 text-[#2E7D32] flex items-center justify-center">
-              <Volume2 size={32} />
-            </div>
-            <h2 className="text-3xl font-bold mt-5">Hora de tu medicación</h2>
-            <p className="text-[#747970] text-lg mt-3">
-              Es momento de tomar <strong className="text-[#212121]">{activo.canal || "tu medicamento"}</strong>.
-            </p>
-            <button
-              type="button"
-              onClick={() => setActivo(null)}
-              className="w-full mt-7 bg-[#2E7D32] text-white rounded-2xl py-4 font-bold"
-            >
-              Cerrar aviso
-            </button>
-            <button
-              type="button"
-              onClick={() => void reproducirRingtone()}
-              className="w-full mt-3 border border-gray-300 rounded-2xl py-3 font-semibold"
-            >
-              Activar o probar sonido
-            </button>
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-7 text-center shadow-xl">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#2E7D32]/10 text-[#2E7D32]"><Volume2 size={32} /></div>
+            <h2 className="mt-5 text-3xl font-bold">Hora de tu medicación</h2>
+            <p className="mt-3 text-lg text-[#747970]">Es momento de tomar <strong className="text-[#212121]">{activo.canal || "tu medicamento"}</strong>.</p>
+            <button type="button" onClick={() => setActivo(null)} className="mt-7 w-full rounded-2xl bg-[#2E7D32] py-4 font-bold text-white">Cerrar aviso</button>
+            <button type="button" onClick={() => void posponerAviso()} disabled={posponiendo} className="mt-3 w-full rounded-2xl border border-gray-300 py-3 font-semibold disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400">{posponiendo ? "Posponiendo..." : "Posponer toma 10 minutos"}</button>
           </div>
         </div>
       )}
@@ -245,6 +281,9 @@ function claveAviso(recordatorio: RecordatorioApi) {
         String(fecha.getHours()).padStart(2, "0"),
         String(fecha.getMinutes()).padStart(2, "0"),
       ].join("");
-
   return `cuidarPlusAviso-${recordatorio.idRecordatorio}-${horario}`;
+}
+
+function nombreRingtone(ringtone: Ringtone) {
+  return ringtone.replace(".mp3", "");
 }

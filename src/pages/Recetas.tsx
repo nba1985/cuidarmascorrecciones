@@ -13,7 +13,7 @@ import {
   type RecetaApi,
   type UsuarioApi,
 } from "../services/api";
-import { Button, ConfirmDialog, EmptyState, ErrorState, LoadingState } from "../components/ui";
+import { Button, ConfirmDialog, EmptyState, ErrorState, LoadingState, Modal } from "../components/ui";
 
 interface RecetaVista {
   id: number;
@@ -55,6 +55,8 @@ export function Recetas() {
   const [guardando, setGuardando] = useState(false);
   const [eliminandoId, setEliminandoId] = useState<number | null>(null);
   const [errorArchivo, setErrorArchivo] = useState("");
+  const [busqueda, setBusqueda] = useState("");
+  const [vistaPrevia, setVistaPrevia] = useState<RecetaVista | null>(null);
 
   useEffect(() => {
     cargarRecetas();
@@ -189,13 +191,8 @@ export function Recetas() {
           </button>
         </div>
 
-        <div className="flex flex-wrap gap-3 mb-8">
-          <button className="px-6 py-2 rounded-xl bg-[#2E7D32] text-white font-medium">
-            Activas
-          </button>
-          <button className="px-6 py-2 rounded-xl bg-white border border-gray-200 text-[#747970] font-medium">
-            Historial
-          </button>
+        <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
+          <input type="search" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} placeholder="Buscar por archivo u observación..." aria-label="Buscar recetas" className="w-full rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-[#2E7D32]/20" />
         </div>
 
         <div className="grid md:grid-cols-2 gap-5">
@@ -203,7 +200,7 @@ export function Recetas() {
           {!cargando && error && <ErrorState message={error} onRetry={() => void cargarRecetas()} />}
           {!cargando && recetas.length === 0 && !error && <EmptyState title="No hay recetas cargadas" description="Adjuntá una receta para tenerla disponible cuando la necesites." action={<Button onClick={abrirNuevaReceta} className="bg-[#2E7D32] text-white px-5 py-3">Cargar primera receta</Button>} />}
 
-          {recetas.map((receta, index) => (
+          {recetas.filter((item) => `${item.nombre} ${item.observaciones}`.toLocaleLowerCase("es-AR").includes(busqueda.toLocaleLowerCase("es-AR"))).map((receta, index) => (
             <article
               key={receta.id}
               className="relative bg-white rounded-3xl border border-gray-200 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md opacity-0 animate-[slideUp_.55s_ease-out_forwards]"
@@ -232,9 +229,9 @@ export function Recetas() {
               <p className="text-[#212121] mt-5 leading-relaxed">{receta.observaciones}</p>
 
               {receta.nombre.startsWith("/uploads/") && (
-                <a href={resolverUrlArchivo(receta.nombre)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 mt-4 text-[#2E7D32] font-semibold hover:underline">
-                  <ExternalLink size={17} /> Ver archivo adjunto
-                </a>
+                <button type="button" onClick={() => setVistaPrevia(receta)} className="inline-flex items-center gap-2 mt-4 text-[#2E7D32] font-semibold hover:underline">
+                  <ExternalLink size={17} /> Vista previa
+                </button>
               )}
 
               <div className="flex gap-3 mt-6">
@@ -336,6 +333,19 @@ export function Recetas() {
         </div>
       )}
 
+      <Modal open={Boolean(vistaPrevia)} title="Vista previa de receta" onClose={() => setVistaPrevia(null)}>
+        {vistaPrevia && <div className="mt-5">
+          {esPdf(vistaPrevia.nombre) ? (
+            <iframe src={resolverUrlArchivo(vistaPrevia.nombre)} title={`Receta ${vistaPrevia.nombre}`} className="h-[62vh] w-full rounded-2xl border border-gray-200" />
+          ) : esImagenCompatible(vistaPrevia.nombre) ? (
+            <img src={resolverUrlArchivo(vistaPrevia.nombre)} alt="Receta adjunta" className="max-h-[62vh] w-full rounded-2xl bg-gray-50 object-contain" />
+          ) : (
+            <div className="rounded-2xl bg-gray-50 p-6 text-center text-[#747970]">Este formato no admite vista previa directa en todos los navegadores.</div>
+          )}
+          <a href={resolverUrlArchivo(vistaPrevia.nombre)} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 font-semibold text-[#2E7D32]"><ExternalLink size={17} /> Abrir archivo completo</a>
+        </div>}
+      </Modal>
+
       <ConfirmDialog open={eliminandoId !== null} title="Eliminar receta" description="Esta acción eliminará la receta de tu perfil." onCancel={() => setEliminandoId(null)} onConfirm={() => eliminandoId && void handleEliminar(eliminandoId)} />
 
       <style>{`
@@ -346,6 +356,14 @@ export function Recetas() {
       `}</style>
     </section>
   );
+}
+
+function esPdf(nombre: string) {
+  return nombre.toLocaleLowerCase("es-AR").split(/[?#]/)[0].endsWith(".pdf");
+}
+
+function esImagenCompatible(nombre: string) {
+  return /\.(jpe?g|png|webp)$/i.test(nombre.split(/[?#]/)[0]);
 }
 
 function obtenerUsuarioActual(): UsuarioApi | null {

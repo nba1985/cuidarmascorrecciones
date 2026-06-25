@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   crearHistorialAnimo,
   type UsuarioApi,
@@ -40,7 +40,9 @@ const estadosAnimo = [
 
 export function HistorialAnimo() {
   const navigate = useNavigate();
+  const location = useLocation();
   const usuarioActual = obtenerUsuarioActual();
+  const idRegistroToma = (location.state as { idRegistroToma?: number } | null)?.idRegistroToma;
 
   const [estadoSeleccionado, setEstadoSeleccionado] = useState("");
   const [observacion, setObservacion] = useState("");
@@ -67,6 +69,7 @@ export function HistorialAnimo() {
         observaciones: observacion || estadoSeleccionado,
         idUsuario: usuarioActual?.idUsuario ?? null,
         idEstado,
+        idRegistroToma: idRegistroToma ?? null,
       });
 
       alert("Estado de ánimo guardado correctamente.");

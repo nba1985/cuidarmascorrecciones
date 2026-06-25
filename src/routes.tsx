@@ -12,6 +12,7 @@ import { Recetas } from "./pages/Recetas";
 import { HistorialAnimo } from "./pages/HistorialdeAnimo";
 import { Historial } from "./pages/Historial";
 import { Nuevacuenta } from "./pages/Nuevacuenta";
+import { MedicamentoDetalle } from "./pages/MedicamentoDetalle";
 
 import { Layouts } from "./components/layouts/Layouts";
 import { RutaProtegida } from "./components/RutaProtegida";
@@ -52,6 +53,10 @@ export const router = createBrowserRouter([
       {
         path: "medicamentos",
         element: <Medicamentos />,
+      },
+      {
+        path: "medicamentos/:id",
+        element: <MedicamentoDetalle />,
       },
 
       // PERFIL
