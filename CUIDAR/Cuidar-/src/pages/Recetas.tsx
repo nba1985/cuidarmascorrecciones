@@ -26,6 +26,7 @@ interface RecetaVista {
 
 const formInicial = {
   nombre: "",
+  titulo: "",
   observaciones: "",
   idMedico: "",
 };
@@ -68,6 +69,17 @@ export function Recetas() {
     obtenerMedicos().then(setMedicos).catch(() => setMedicos([]));
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const cerrarConEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("keydown", cerrarConEscape);
+    return () => document.removeEventListener("keydown", cerrarConEscape);
+  }, [open]);
+
   async function cargarRecetas() {
     setCargando(true);
     try {
@@ -94,6 +106,7 @@ export function Recetas() {
     setEditingId(receta.id);
     setFormData({
       nombre: receta.archivo,
+      titulo: receta.nombre,
       observaciones: receta.observaciones === "Sin observaciones" ? "" : receta.observaciones,
       idMedico: receta.idMedico?.toString() ?? "",
     });
@@ -118,6 +131,10 @@ export function Recetas() {
       return;
     }
     setArchivoSeleccionado(archivo);
+    setFormData((actual) => ({
+      ...actual,
+      titulo: actual.titulo.trim() ? actual.titulo : limpiarNombreArchivo(archivo.name),
+    }));
     setErrorArchivo("");
   }
 
@@ -147,12 +164,16 @@ export function Recetas() {
       }
 
       if (!rutaArchivo) throw new Error("Seleccioná un archivo de receta.");
+      const tituloReceta = formData.titulo.trim();
+      if (!tituloReceta) throw new Error("Ingresá un nombre para identificar la receta.");
       const payload = { archivos: rutaArchivo, observaciones: formData.observaciones, idMedico, idUsuario: usuarioActual?.idUsuario };
 
       if (editingId) {
         await actualizarReceta(editingId, payload);
+        guardarNombrePersonalizadoReceta(editingId, tituloReceta);
       } else {
-        await crearReceta(payload);
+        const creada = await crearReceta(payload);
+        guardarNombrePersonalizadoReceta(creada.idReceta, tituloReceta);
       }
 
       await cargarRecetas();
@@ -299,6 +320,15 @@ export function Recetas() {
               {errorArchivo && <span role="alert" className="block text-sm text-red-600 mt-2">{errorArchivo}</span>}
               <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" className="sr-only" onChange={seleccionarArchivo} />
             </label>
+
+            <input
+              required
+              value={formData.titulo}
+              onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+              placeholder="Nombre de la receta"
+              className="border border-gray-300 rounded-2xl p-3 outline-none focus:border-[#2E7D32] sm:p-4"
+            />
+
             <select value={formData.idMedico} onChange={(e) => setFormData({ ...formData, idMedico: e.target.value })} disabled={nuevoMedico} className="border border-gray-300 rounded-2xl p-3 bg-white outline-none focus:border-[#2E7D32] sm:p-4">
               <option value="">Sin médico asociado</option>
               {medicos.map((medico) => <option key={medico.idMedico} value={medico.idMedico}>{medico.nombre} {medico.apellido} · Mat. {medico.matricula}</option>)}
@@ -381,8 +411,12 @@ function obtenerUsuarioActual(): UsuarioApi | null {
 }
 
 const CLAVE_NOMBRES_RECETAS = "cuidarPlusNombresOriginalesRecetas";
+const CLAVE_TITULOS_RECETAS = "cuidarPlusTitulosRecetas";
 
 function nombreVisibleReceta(receta: RecetaApi) {
+  const nombrePersonalizado = obtenerNombresPersonalizadosRecetas()[receta.idReceta];
+  if (nombrePersonalizado) return nombrePersonalizado;
+
   const archivo = receta.archivos?.trim();
   if (!archivo) return `Receta digital #${receta.idReceta}`;
 
@@ -419,6 +453,20 @@ function guardarNombreOriginalReceta(ruta: string, nombreOriginal: string) {
   const nombres = obtenerNombresOriginalesRecetas();
   nombres[ruta] = nombreOriginal;
   localStorage.setItem(CLAVE_NOMBRES_RECETAS, JSON.stringify(nombres));
+}
+
+function obtenerNombresPersonalizadosRecetas(): Record<number, string> {
+  try {
+    return JSON.parse(localStorage.getItem(CLAVE_TITULOS_RECETAS) || "{}") as Record<number, string>;
+  } catch {
+    return {};
+  }
+}
+
+function guardarNombrePersonalizadoReceta(idReceta: number, nombre: string) {
+  const nombres = obtenerNombresPersonalizadosRecetas();
+  nombres[idReceta] = nombre;
+  localStorage.setItem(CLAVE_TITULOS_RECETAS, JSON.stringify(nombres));
 }
 
 

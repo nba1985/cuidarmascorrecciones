@@ -291,6 +291,13 @@ button, a, input, select, textarea { touch-action: manipulation; }
   background-color: #1F2937 !important;
   border-color: #374151 !important;
 }
+.modo-oscuro .app-footer {
+  background-color: transparent !important;
+}
+.modo-oscuro .app-footer > div {
+  background-color: #1F2937 !important;
+  border-color: #374151 !important;
+}
 .modo-oscuro .mobile-bottom-nav {
   background-color: #1F2937 !important;
   border-color: #374151 !important;

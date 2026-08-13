@@ -12,6 +12,7 @@ El formato sigue conceptualmente [Keep a Changelog](https://keepachangelog.com/e
 
 ### Corregido
 
+- Modales manuales de Medicamentos, Recetas, Perfil, Recordatorios y aviso/configuración de recordatorios: ahora también cierran con la tecla `ESC`, además de la cruz o los botones existentes.
 - Cruces de cierre de modales: se unifica el estilo de cierre en modal común, Medicamentos, Recetas, Perfil y configuración de sonido para que todos usen la misma `x`, tamaño, color y comportamiento hover.
 - Modal de nuevo/editar medicamento en pantallas horizontales bajas tipo Nest Hub/Nest Hub Max: queda por encima del menú inferior y usa una versión compacta hasta 820px de alto para evitar que el título o los botones queden cortados, incluso con A+.
 - Modales en responsivo: ahora la capa del modal puede desplazarse verticalmente sólo en móviles, respeta el menú inferior fijo y evita que formularios largos queden trabados; en PC/tablet no muestra scroll interno cuando el modal entra en pantalla, incluso con A+.
@@ -28,6 +29,8 @@ El formato sigue conceptualmente [Keep a Changelog](https://keepachangelog.com/e
 
 ### AÃ±adido
 
+- Campo editable “Nombre de la receta” al cargar o editar recetas; el nombre se sugiere desde el archivo adjunto y queda guardado localmente asociado al ID de la receta para que las tarjetas no dependan sólo del nombre del archivo.
+- Footer institucional liviano en el layout principal con descripción de CUIDAR+, versión, copyright 2026 y aviso de consulta profesional, compatible con modo claro/oscuro y separado del menú móvil fijo.
 - EnvÃ­o del token de recuperaciÃ³n al correo registrado mediante SMTP configurable, con plantilla HTML, vencimiento y uso Ãºnico.
 - ConfiguraciÃ³n segura del correo mediante User Secrets o variables `Email__*`, incluyendo instrucciones para Gmail con contraseÃ±a de aplicaciÃ³n.
 - Remitente SMTP predeterminado `cuidarmasvdr@gmail.com` sobre Gmail; la contraseÃ±a de aplicaciÃ³n permanece obligatoriamente fuera del repositorio.
@@ -141,6 +144,7 @@ El formato sigue conceptualmente [Keep a Changelog](https://keepachangelog.com/e
 
 ### Verificado
 
+- Nombres editables de recetas y cierre por `ESC`: frontend compila, pruebas 2/2 y lint sin errores; persisten cinco advertencias conocidas de hooks. ZIP regenerado y sincronizado con la copia original de `2026-06-11`.
 - Textos de recupero de contraseÃ±a: backend compila 0 errores/advertencias, frontend compila, pruebas 2/2 y lint sin errores; persisten cinco advertencias conocidas de hooks.
 - Recupero de contraseÃ±a compatible con bases existentes: backend compila 0 errores/advertencias, frontend compila, pruebas 2/2 y lint sin errores; persisten cinco advertencias conocidas de hooks.
 - Grupo sanguÃ­neo unificado visualmente: frontend compila, pruebas 2/2 y lint sin errores; persisten cinco advertencias conocidas de hooks.

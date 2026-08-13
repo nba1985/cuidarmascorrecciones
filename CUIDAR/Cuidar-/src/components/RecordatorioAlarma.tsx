@@ -137,6 +137,29 @@ export function RecordatorioAlarma() {
     return detenerSonido;
   }, [activo, detenerSonido, reproducirRingtone]);
 
+  const cerrarConfiguracion = useCallback(() => {
+    detenerSonido();
+    setProbando(null);
+    setRingtoneSeleccionado(ringtoneGuardado);
+    setConfiguracionAbierta(false);
+  }, [detenerSonido, ringtoneGuardado]);
+
+  useEffect(() => {
+    if (!configuracionAbierta && !activo) return;
+
+    const cerrarConEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (configuracionAbierta) {
+        cerrarConfiguracion();
+        return;
+      }
+      if (activo) setActivo(null);
+    };
+
+    document.addEventListener("keydown", cerrarConEscape);
+    return () => document.removeEventListener("keydown", cerrarConEscape);
+  }, [activo, configuracionAbierta, cerrarConfiguracion]);
+
   async function activarAvisos() {
     if (!("Notification" in window) || !("serviceWorker" in navigator)) {
       alert("Este navegador no admite notificaciones de la aplicación.");
@@ -167,13 +190,6 @@ export function RecordatorioAlarma() {
     setRingtoneGuardado(ringtoneSeleccionado);
     setConfiguracionAbierta(false);
     alert(`Tono ${nombreRingtone(ringtoneSeleccionado)} guardado.`);
-  }
-
-  function cerrarConfiguracion() {
-    detenerSonido();
-    setProbando(null);
-    setRingtoneSeleccionado(ringtoneGuardado);
-    setConfiguracionAbierta(false);
   }
 
   async function posponerAviso() {

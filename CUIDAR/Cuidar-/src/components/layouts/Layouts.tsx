@@ -143,6 +143,22 @@ export function Layouts() {
         <Outlet />
       </main>
 
+      {/* FOOTER INSTITUCIONAL */}
+      <footer className="app-footer px-3 pb-32 pt-2 md:px-4 xl:pb-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 rounded-3xl border border-gray-200 bg-white px-5 py-5 text-sm text-[#747970] shadow-sm sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-base font-bold text-[#2E7D32]">CUIDAR+</p>
+            <p className="mt-1">Acompañamiento digital para tratamientos, recetas y recordatorios.</p>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-1 lg:justify-end">
+            <span>Versión 1.0</span>
+            <span>© 2026 CUIDAR+</span>
+            <span className="max-w-xl">Ante dudas médicas, consultá siempre con un profesional.</span>
+          </div>
+        </div>
+      </footer>
+
       {/* FOOTER MOBILE */}
       <footer className="mobile-bottom-nav xl:hidden fixed bottom-0 left-0 right-0 w-full max-w-full overflow-hidden bg-white border-t border-gray-200 shadow-lg z-50">
 

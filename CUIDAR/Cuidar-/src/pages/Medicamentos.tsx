@@ -106,6 +106,17 @@ export function Medicamentos() {
   }, []);
 
   useEffect(() => {
+    if (!open) return;
+
+    const cerrarConEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("keydown", cerrarConEscape);
+    return () => document.removeEventListener("keydown", cerrarConEscape);
+  }, [open]);
+
+  useEffect(() => {
     const intervalo = window.setInterval(() => setReloj(Date.now()), 30_000);
     return () => window.clearInterval(intervalo);
   }, []);

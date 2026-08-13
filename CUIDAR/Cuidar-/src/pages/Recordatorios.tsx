@@ -68,6 +68,17 @@ export function Recordatorios() {
     return () => window.clearInterval(intervalo);
   }, []);
 
+  useEffect(() => {
+    if (!editando) return;
+
+    const cerrarConEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setEditando(null);
+    };
+
+    document.addEventListener("keydown", cerrarConEscape);
+    return () => document.removeEventListener("keydown", cerrarConEscape);
+  }, [editando]);
+
   async function registrarToma(recordatorio: RecordatorioVista, estado: boolean) {
     if (estado && !puedeConfirmarHorario(recordatorio.fechaHoraProgramada)) {
       alert(textoVentanaConfirmacion(recordatorio.fechaHoraProgramada));

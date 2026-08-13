@@ -62,7 +62,7 @@ El repositorio contiene un frontend React/TypeScript, una API ASP.NET Core y un 
 - Motivo obligatorio cuando el usuario registra Mal o Muy mal; para Regular, Bien y Muy bien alcanza con seleccionar el emoji.
 - GestiÃ³n de recetas desde el frontend.
 - Recetas con adjuntos PDF/JPG/PNG/WEBP/HEIC/HEIF de hasta 10 MB, selecciÃ³n de mÃ©dico existente o alta de uno nuevo.
-- Recetas muestran tÃ­tulos amigables; las rutas internas de archivos se conservan para apertura/vista previa, pero no se usan como nombre principal.
+- Recetas muestran tÃ­tulos amigables y editables; las rutas internas de archivos se conservan para apertura/vista previa, pero no se usan como nombre principal. Los nombres personalizados se guardan localmente asociados al ID de receta porque la tabla SQL actual no tiene columna de nombre.
 - Inicio incluye una tarjeta visual de farmacias cercanas con Google Maps embebido y apertura externa; la bÃºsqueda se genera con la localidad registrada en el perfil y usa CÃ³rdoba Capital como respaldo si estÃ¡ vacÃ­a.
 - Las horas de prÃ³ximas dosis, recordatorios, historial y detalle de medicamento se muestran uniformemente en formato digital de 24 horas `HH:mm` (`00:00` a `23:59`).
 - Modo claro/oscuro persistente desde el encabezado; conserva la estÃ©tica verde de CUIDAR+ y ajusta fondos, textos, bordes, formularios, modales e iframe.
@@ -236,6 +236,15 @@ El repositorio contiene un frontend React/TypeScript, una API ASP.NET Core y un 
 
 ## Archivos modificados recientemente
 
+### 2026-08-13 — Nombres editables de recetas y cierre con ESC
+
+- `CUIDAR/Cuidar-/src/pages/Recetas.tsx`: agrega campo obligatorio “Nombre de la receta” en alta/edición, sugiere el título desde el archivo seleccionado, permite cambiarlo y conserva el título personalizado en `localStorage` por ID de receta.
+- `CUIDAR/Cuidar-/src/pages/Recetas.tsx`: el modal de receta ahora cierra con `ESC`, además de la cruz y Cancelar.
+- `CUIDAR/Cuidar-/src/pages/Medicamentos.tsx`, `src/pages/Perfil.tsx` y `src/pages/Recordatorios.tsx`: los modales manuales de alta/edición también cierran con `ESC`.
+- `CUIDAR/Cuidar-/src/components/RecordatorioAlarma.tsx`: la configuración de sonido y el aviso activo de medicación cierran con `ESC`; en el aviso activo se detiene el sonido igual que al cerrar manualmente.
+
+Verificación: frontend compilado, pruebas 2/2 y lint con 0 errores + 5 advertencias conocidas de hooks. Backend sin cambios en esta mejora. ZIP regenerado en `outputs/CuidarPlus_Corregido.zip` y sincronizado con el ZIP original de `2026-06-11`.
+
 ### 2026-08-13 — Retiro temporal de lectura inteligente de recetas
 
 - `CUIDAR/Cuidar-/src/pages/Recetas.tsx` y `src/services/api.ts`: se quitó la acción de análisis con IA, sus estados, tipos y llamada HTTP; la carga manual de recetas, médicos, observaciones y vista previa queda vigente.
@@ -253,11 +262,13 @@ Verificación: backend Release compilado con 0 errores/advertencias; frontend co
 - `CUIDAR/Cuidar-/src/index.css`, `src/components/ui.tsx`, `src/components/RecordatorioAlarma.tsx`, `src/pages/Medicamentos.tsx`, `src/pages/Perfil.tsx`, `src/pages/Recetas.tsx` y `src/pages/Recordatorios.tsx`: incorporan una capa de modal desplazable sólo en móvil, con espacio inferior para la navegación fija; desde 768px el panel no fuerza scroll interno para evitar barras en PC/tablet cuando el modal entra en pantalla, incluso con A+.
 - `CUIDAR/Cuidar-/src/index.css` y `src/pages/Medicamentos.tsx`: agregan variante compacta para el modal de nuevo/editar medicamento en pantallas horizontales bajas tipo Nest Hub/Nest Hub Max (`min-width: 768px` y `max-height: 820px`), elevando el z-index del modal por encima del menú inferior y reduciendo paddings/gaps/alturas mínimas para que entren título, ficha clínica y botones incluso con A+.
 - `CUIDAR/Cuidar-/src/index.css`, `src/components/ui.tsx`, `src/components/RecordatorioAlarma.tsx`, `src/pages/Medicamentos.tsx`, `src/pages/Perfil.tsx` y `src/pages/Recetas.tsx`: unifican el cierre por cruz con la clase `modal-close-button`, usando la misma `x`, tamaño, color y hover en modo claro/oscuro; Recetas y Perfil incorporan cruz de cierre en el encabezado.
+- `CUIDAR/Cuidar-/src/components/layouts/Layouts.tsx`: agrega footer institucional no fijo con descripción de CUIDAR+, versión 1.0, copyright 2026 y aviso de consulta profesional; se ubica después del contenido principal y antes de la navegación móvil fija.
+- `CUIDAR/Cuidar-/src/index.css`: agrega compatibilidad de modo oscuro para `.app-footer`, manteniendo la tarjeta de footer coherente con el resto de la interfaz.
 - `CUIDAR/Cuidar-/src/index.css`: agrega variantes oscuras para fondos, bordes y títulos de tarjetas clínicas de contraindicaciones y efectos secundarios, evitando tarjetas claras con texto lavado en modo oscuro.
 - `CUIDAR/Cuidar-/src/index.css` y `CUIDAR/Cuidar-/src/pages/Medicamentos.tsx`: ajustan las acciones de cada tarjeta de Medicamentos para que los botones mantengan texto en una sola línea cuando hay espacio, se distribuyan en grilla en tamaños intermedios y no queden con texto invisible al hacer hover/disabled en modo oscuro.
 - `CUIDAR/Cuidar-/src/pages/MedicamentoDetalle.tsx`: limpia mojibake remanente en ficha clínica, planificación, “Últimas tomas”, “Crónico” y separadores.
 
-Verificación: frontend compilado y pruebas 2/2. Backend sin cambios en esta corrección. ZIP regenerado en `outputs/CuidarPlus_Corregido.zip` y sincronizado con el ZIP original de `2026-06-11`.
+Verificación: frontend compilado, pruebas 2/2 y lint con 0 errores + 5 advertencias conocidas de hooks. Backend sin cambios en esta corrección. ZIP regenerado en `outputs/CuidarPlus_Corregido.zip` y sincronizado con el ZIP original de `2026-06-11`.
 
 ### 2026-06-28 â€” RecuperaciÃ³n de contraseÃ±a por correo
 
@@ -633,6 +644,7 @@ VerificaciÃ³n: backends y frontends compilan sin errores; Swagger expone PUT `
 - [ ] Definir recurrencia y zona horaria de recordatorios en el backend.
 - [x] Implementar tratamientos cÃ­clicos con dÃ­as activos/descanso y supresiÃ³n automÃ¡tica de recordatorios durante pausas programadas.
 - [ ] Persistir en SQL Server las fichas clÃ­nicas de medicamentos y la planificaciÃ³n de tratamientos que hoy usan `localStorage`.
+- [ ] Si se necesita sincronización entre equipos, agregar columna de nombre/título a `RECETAS` y persistir allí los nombres personalizados que hoy se guardan en `localStorage`.
 - [ ] Evitar confirmaciones duplicadas de una misma dosis mediante una restricciÃ³n transaccional en backend.
 - [ ] Revisar la asociaciÃ³n de recetas, tratamientos y usuarios.
 - [ ] Reimplementar más adelante lectura inteligente de recetas sin afectar la carga manual.
@@ -666,7 +678,7 @@ VerificaciÃ³n: backends y frontends compilan sin errores; Swagger expone PUT `
 ## PrÃ³ximos pasos prioritarios
 
 1. Probar carga manual de recetas sin lectura inteligente y confirmar que no aparece el error de API/clave.
-2. Persistir en SQL Server la planificación que todavía vive en `localStorage`.
+2. Persistir en SQL Server la planificación y los títulos personalizados de recetas que todavía viven en `localStorage`.
 3. Reimplementar más adelante la lectura inteligente de recetas con una estrategia de credenciales estable, manteniendo la carga manual como flujo principal.
 4. Corregir las advertencias de hooks reportadas por ESLint.
 5. Limpiar textos mojibakeados en interfaz/documentación sin cambiar la lógica.

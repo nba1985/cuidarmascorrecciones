@@ -66,6 +66,17 @@ export function Perfil() {
       .catch(() => setError("No se pudo cargar VW_PerfilUsuario desde la API."));
   }, [usuarioApi?.idUsuario]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const cerrarConEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("keydown", cerrarConEscape);
+    return () => document.removeEventListener("keydown", cerrarConEscape);
+  }, [open]);
+
   const paciente = useMemo(() => {
     const edad = calcularEdad(perfil?.fechaNacimiento ?? usuarioApi?.fechaNacimiento);
 
