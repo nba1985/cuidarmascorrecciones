@@ -223,8 +223,8 @@ export function Recordatorios() {
       </div>
 
       {editando && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <form onSubmit={guardarHorario} className="w-full max-w-md bg-white rounded-3xl p-7 shadow-xl">
+        <div className="modal-scroll-layer fixed inset-0 z-50 bg-black/40 flex justify-center p-3 sm:p-4">
+          <form onSubmit={guardarHorario} className="modal-scroll-panel w-full max-w-md bg-white rounded-3xl p-5 shadow-xl sm:p-7">
             <p className="text-sm font-semibold text-[#2E7D32]">RECORDATORIO</p>
             <h2 className="text-2xl font-bold mt-1">Editar horario</h2>
             <p className="text-[#747970] mt-2">{editando.titulo}</p>

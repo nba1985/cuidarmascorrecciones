@@ -12,6 +12,12 @@ El formato sigue conceptualmente [Keep a Changelog](https://keepachangelog.com/e
 
 ### Corregido
 
+- Cruces de cierre de modales: se unifica el estilo de cierre en modal común, Medicamentos, Recetas, Perfil y configuración de sonido para que todos usen la misma `x`, tamaño, color y comportamiento hover.
+- Modal de nuevo/editar medicamento en pantallas horizontales bajas tipo Nest Hub/Nest Hub Max: queda por encima del menú inferior y usa una versión compacta hasta 820px de alto para evitar que el título o los botones queden cortados, incluso con A+.
+- Modales en responsivo: ahora la capa del modal puede desplazarse verticalmente sólo en móviles, respeta el menú inferior fijo y evita que formularios largos queden trabados; en PC/tablet no muestra scroll interno cuando el modal entra en pantalla, incluso con A+.
+- Acciones de tarjetas de Medicamentos: los botones se ordenan mejor, evitan cortar textos como “Ver detalle” y corrigen hover/disabled en modo oscuro para que ningún botón quede claro con texto invisible.
+- Tarjetas de contraindicaciones y efectos secundarios en modo oscuro: ahora usan fondos, bordes y títulos oscuros legibles en lista y detalle de medicamentos.
+- Textos mojibakeados restantes en el detalle del medicamento, incluyendo ficha clínica, planificación, “Últimas tomas”, “Crónico” y separadores `·`.
 - Textos visibles mojibakeados en Recetas, Perfil, Medicamentos, API frontend y componentes comunes; opciones como “Sin médico asociado”, “Médico”, “Matrícula”, “Teléfono” y separadores `·` vuelven a verse correctamente.
 - Modales principales de edición/alta en Recetas, Medicamentos y Perfil compactados para evitar scroll interno en el modal y aprovechar mejor el ancho disponible, incluso con el modo A+.
 - Contraindicaciones y efectos secundarios existentes en `MEDICAMENTOS` ahora viajan por la API y se muestran en tarjetas, detalle y selecciÃ³n del catÃ¡logo como informaciÃ³n de solo lectura; el usuario no puede modificarlos desde un tratamiento.

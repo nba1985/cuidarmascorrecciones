@@ -280,14 +280,17 @@ export function Recetas() {
       </div>
 
       {open && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
+        <div className="modal-scroll-layer fixed inset-0 bg-black/40 flex justify-center z-50 p-3 sm:p-4">
           <form
             onSubmit={handleSubmit}
-            className="w-full max-w-xl rounded-3xl bg-white p-5 shadow-xl flex flex-col gap-3 sm:p-6"
+            className="modal-scroll-panel w-full max-w-xl rounded-3xl bg-white p-5 shadow-xl flex flex-col gap-3 sm:p-6"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#2E7D32]">
-              {editingId ? "Editar receta" : "Nueva receta"}
-            </h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#2E7D32]">
+                {editingId ? "Editar receta" : "Nueva receta"}
+              </h2>
+              <button type="button" onClick={() => setOpen(false)} aria-label="Cerrar" className="modal-close-button">x</button>
+            </div>
 
             <label className="border border-dashed border-[#2E7D32]/50 bg-[#2E7D32]/5 rounded-2xl p-3 cursor-pointer sm:p-4">
               <span className="flex items-center gap-2 font-semibold text-[#2E7D32]"><Upload size={19} /> Adjuntar receta</span>

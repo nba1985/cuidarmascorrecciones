@@ -25,9 +25,9 @@ export function Modal({ open, title, children, onClose }: { open: boolean; title
     return () => document.removeEventListener("keydown", close);
   }, [open, onClose]);
   if (!open) return null;
-  return <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-3 sm:p-4" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-    <section role="dialog" aria-modal="true" aria-labelledby="modal-title" className="w-full max-w-lg rounded-3xl bg-white p-5 shadow-xl sm:p-6">
-      <div className="flex items-center justify-between gap-4"><h2 id="modal-title" className="text-2xl font-bold text-[#2E7D32]">{title}</h2><button type="button" onClick={onClose} aria-label="Cerrar" className="w-10 h-10 rounded-full hover:bg-gray-100">×</button></div>
+  return <div className="modal-scroll-layer fixed inset-0 z-50 bg-black/40 flex justify-center p-3 sm:p-4" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <section role="dialog" aria-modal="true" aria-labelledby="modal-title" className="modal-scroll-panel w-full max-w-lg rounded-3xl bg-white p-5 shadow-xl sm:p-6">
+      <div className="flex items-center justify-between gap-4"><h2 id="modal-title" className="text-2xl font-bold text-[#2E7D32]">{title}</h2><button type="button" onClick={onClose} aria-label="Cerrar" className="modal-close-button">x</button></div>
       {children}
     </section>
   </div>;

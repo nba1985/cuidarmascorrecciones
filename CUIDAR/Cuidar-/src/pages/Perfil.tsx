@@ -310,12 +310,15 @@ export function Perfil() {
       </section>
 
       {open && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4">
+        <div className="modal-scroll-layer fixed inset-0 bg-black/40 flex justify-center z-50 p-3 sm:p-4">
           <form
             onSubmit={handleSubmit}
-            className="bg-white w-full max-w-6xl rounded-[28px] p-4 shadow-xl sm:p-5"
+            className="modal-scroll-panel bg-white w-full max-w-6xl rounded-[28px] p-4 shadow-xl sm:p-5"
           >
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#2E7D32]">Editar perfil</h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#2E7D32]">Editar perfil</h2>
+              <button type="button" onClick={() => setOpen(false)} aria-label="Cerrar" className="modal-close-button">x</button>
+            </div>
 
             <div className="grid gap-3 mt-4 md:grid-cols-3">
               <input

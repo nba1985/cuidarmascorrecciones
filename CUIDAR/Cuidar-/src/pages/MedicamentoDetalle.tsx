@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, Clock3, FileText, Pill, TrendingUp } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { EmptyState, ErrorState, LoadingState } from "../components/ui";
@@ -123,3 +123,4 @@ function obtenerUsuarioActual(): UsuarioApi | null {
 function formatearFechaCorta(fecha: string) {
   return new Date(`${fecha.slice(0, 10)}T00:00:00`).toLocaleDateString("es-AR");
 }
+

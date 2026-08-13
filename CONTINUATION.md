@@ -250,8 +250,14 @@ Verificación: backend Release compilado con 0 errores/advertencias; frontend co
 - `CUIDAR/Cuidar-/src/pages/Medicamentos.tsx`: el modal de nuevo/editar medicamento pasa a un diseño ancho en grilla, con campos, tarjetas de tratamiento y ficha clínica más compactas para entrar mejor en pantalla.
 - `CUIDAR/Cuidar-/src/pages/Perfil.tsx`: el modal de edición usa tres columnas en escritorio, campos más compactos y bloque de foto reducido para evitar el scroll interno.
 - `CUIDAR/Cuidar-/src/services/api.ts` y `src/components/ui.tsx`: corrigen textos mojibakeados comunes y el modal genérico deja de forzar scroll interno.
+- `CUIDAR/Cuidar-/src/index.css`, `src/components/ui.tsx`, `src/components/RecordatorioAlarma.tsx`, `src/pages/Medicamentos.tsx`, `src/pages/Perfil.tsx`, `src/pages/Recetas.tsx` y `src/pages/Recordatorios.tsx`: incorporan una capa de modal desplazable sólo en móvil, con espacio inferior para la navegación fija; desde 768px el panel no fuerza scroll interno para evitar barras en PC/tablet cuando el modal entra en pantalla, incluso con A+.
+- `CUIDAR/Cuidar-/src/index.css` y `src/pages/Medicamentos.tsx`: agregan variante compacta para el modal de nuevo/editar medicamento en pantallas horizontales bajas tipo Nest Hub/Nest Hub Max (`min-width: 768px` y `max-height: 820px`), elevando el z-index del modal por encima del menú inferior y reduciendo paddings/gaps/alturas mínimas para que entren título, ficha clínica y botones incluso con A+.
+- `CUIDAR/Cuidar-/src/index.css`, `src/components/ui.tsx`, `src/components/RecordatorioAlarma.tsx`, `src/pages/Medicamentos.tsx`, `src/pages/Perfil.tsx` y `src/pages/Recetas.tsx`: unifican el cierre por cruz con la clase `modal-close-button`, usando la misma `x`, tamaño, color y hover en modo claro/oscuro; Recetas y Perfil incorporan cruz de cierre en el encabezado.
+- `CUIDAR/Cuidar-/src/index.css`: agrega variantes oscuras para fondos, bordes y títulos de tarjetas clínicas de contraindicaciones y efectos secundarios, evitando tarjetas claras con texto lavado en modo oscuro.
+- `CUIDAR/Cuidar-/src/index.css` y `CUIDAR/Cuidar-/src/pages/Medicamentos.tsx`: ajustan las acciones de cada tarjeta de Medicamentos para que los botones mantengan texto en una sola línea cuando hay espacio, se distribuyan en grilla en tamaños intermedios y no queden con texto invisible al hacer hover/disabled en modo oscuro.
+- `CUIDAR/Cuidar-/src/pages/MedicamentoDetalle.tsx`: limpia mojibake remanente en ficha clínica, planificación, “Últimas tomas”, “Crónico” y separadores.
 
-Verificación: frontend compilado, backend Release compilado con 0 errores/advertencias, pruebas 2/2 y lint con 0 errores; permanecen cinco advertencias conocidas de hooks. ZIP regenerado en `outputs/CuidarPlus_Corregido.zip` y sincronizado con el ZIP original de `2026-06-11`.
+Verificación: frontend compilado y pruebas 2/2. Backend sin cambios en esta corrección. ZIP regenerado en `outputs/CuidarPlus_Corregido.zip` y sincronizado con el ZIP original de `2026-06-11`.
 
 ### 2026-06-28 â€” RecuperaciÃ³n de contraseÃ±a por correo
 

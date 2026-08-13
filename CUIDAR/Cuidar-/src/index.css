@@ -9,6 +9,108 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .texto-grande { font-size: 112.5%; }
 .texto-grande button, .texto-grande input, .texto-grande select, .texto-grande textarea { min-height: 2.75rem; }
 
+.modal-close-button {
+  display: inline-grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 9999px;
+  background: transparent !important;
+  color: #6B7280;
+  font-size: 1.55rem;
+  font-weight: 600;
+  line-height: 1;
+  transition: color .2s ease, transform .2s ease, background-color .2s ease;
+}
+.modal-close-button:hover,
+.modal-close-button:focus-visible {
+  color: #111827;
+  transform: rotate(90deg);
+  background: rgba(17, 24, 39, .06) !important;
+}
+
+.modal-scroll-layer {
+  align-items: flex-start;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
+  padding-top: .75rem;
+  z-index: 70;
+}
+.modal-scroll-panel {
+  max-height: none;
+}
+@media (min-width: 768px) {
+  .modal-scroll-layer {
+    align-items: center;
+    overflow-y: visible;
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+  }
+  .modal-scroll-panel {
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+@media (min-width: 768px) and (max-height: 820px) {
+  .modal-scroll-layer {
+    align-items: center;
+    overflow-y: visible;
+    padding-bottom: .75rem;
+    padding-top: .75rem;
+  }
+  .modal-scroll-panel {
+    max-height: none;
+    overflow-y: visible;
+  }
+  .medication-modal-panel {
+    max-width: min(72rem, calc(100vw - 4rem));
+    padding: .75rem .95rem !important;
+  }
+  .medication-modal-panel h2 {
+    font-size: clamp(1.45rem, 2.5vw, 1.9rem) !important;
+    line-height: 1.05;
+  }
+  .medication-modal-form {
+    gap: .5rem !important;
+    margin-top: .55rem !important;
+  }
+  .medication-modal-form input,
+  .medication-modal-form select,
+  .medication-modal-form textarea {
+    min-height: 2.25rem !important;
+    padding: .5rem .8rem !important;
+    border-radius: .9rem !important;
+  }
+  .medication-modal-form textarea {
+    min-height: 2.9rem !important;
+  }
+  .medication-modal-form .rounded-3xl,
+  .medication-modal-form .rounded-2xl {
+    border-radius: 1rem !important;
+  }
+  .medication-modal-form label,
+  .medication-modal-form section {
+    padding: .6rem .7rem !important;
+  }
+  .medication-modal-form section p,
+  .medication-modal-form label span,
+  .medication-modal-form label p {
+    line-height: 1.25;
+  }
+  .medication-modal-form button {
+    min-height: 2.4rem !important;
+    padding-top: .55rem !important;
+    padding-bottom: .55rem !important;
+  }
+}
+@media (max-width: 420px) {
+  .modal-scroll-panel {
+    border-radius: 1.5rem;
+  }
+}
+
 .mobile-bottom-nav {
   padding-bottom: max(.35rem, env(safe-area-inset-bottom));
 }
@@ -83,6 +185,15 @@ button, a, input, select, textarea { touch-action: manipulation; }
   background: #111827;
   color: #F5F5F5;
 }
+.modo-oscuro .modal-close-button {
+  color: #D1D5DB !important;
+  background: transparent !important;
+}
+.modo-oscuro .modal-close-button:hover,
+.modo-oscuro .modal-close-button:focus-visible {
+  color: #F5F5F5 !important;
+  background: rgba(255, 255, 255, .06) !important;
+}
 .modo-oscuro .bg-\[\#F5F5F5\],
 .modo-oscuro .bg-gray-50,
 .modo-oscuro .bg-gray-100 {
@@ -94,12 +205,24 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .modo-oscuro .bg-\[\#F7FBF7\] {
   background-color: #17251E !important;
 }
+.modo-oscuro .hover\:bg-\[\#F7FBF7\]:hover {
+  background-color: #17251E !important;
+}
 .modo-oscuro .bg-\[\#F1F8E9\],
 .modo-oscuro .bg-\[\#E8F5E9\] {
   background-color: #1B3324 !important;
 }
+.modo-oscuro .hover\:bg-\[\#E8F5E9\]:hover {
+  background-color: #1B3324 !important;
+}
 .modo-oscuro .bg-\[\#FFF8E1\] {
   background-color: #332A16 !important;
+}
+.modo-oscuro .bg-\[\#FFF7F7\] {
+  background-color: #2A171B !important;
+}
+.modo-oscuro .bg-\[\#FFFDF4\] {
+  background-color: #2A2415 !important;
 }
 .modo-oscuro .text-\[\#212121\],
 .modo-oscuro .text-gray-900,
@@ -123,6 +246,15 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .modo-oscuro .text-\[\#6B4B24\] {
   color: #FBBF24 !important;
 }
+.modo-oscuro .text-\[\#8A1C1C\] {
+  color: #FCA5A5 !important;
+}
+.modo-oscuro .text-\[\#8A5A00\] {
+  color: #FCD34D !important;
+}
+.modo-oscuro .text-red-600 {
+  color: #F87171 !important;
+}
 .modo-oscuro .border-gray-100,
 .modo-oscuro .border-gray-200,
 .modo-oscuro .border-gray-300,
@@ -130,6 +262,22 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .modo-oscuro .border-\[\#B7D8B9\],
 .modo-oscuro .border-\[\#F1D5A8\] {
   border-color: #374151 !important;
+}
+.modo-oscuro .border-\[\#F4B4B4\] {
+  border-color: #7F1D1D !important;
+}
+.modo-oscuro .border-\[\#F6D58A\] {
+  border-color: #854D0E !important;
+}
+.modo-oscuro .border-red-200 {
+  border-color: #7F1D1D !important;
+}
+.modo-oscuro .hover\:bg-red-50:hover {
+  background-color: #2A171B !important;
+}
+.modo-oscuro button:disabled {
+  background-color: #374151 !important;
+  color: #9CA3AF !important;
 }
 .modo-oscuro .shadow,
 .modo-oscuro .shadow-sm,

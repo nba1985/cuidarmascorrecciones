@@ -207,14 +207,14 @@ export function RecordatorioAlarma() {
       </button>
 
       {configuracionAbierta && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-3 sm:p-4">
-          <section role="dialog" aria-modal="true" aria-labelledby="sonido-title" className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl border border-gray-200 bg-white p-5 shadow-xl sm:p-7">
+        <div className="modal-scroll-layer fixed inset-0 z-[70] flex justify-center bg-black/50 p-3 sm:p-4">
+          <section role="dialog" aria-modal="true" aria-labelledby="sonido-title" className="modal-scroll-panel w-full max-w-lg rounded-3xl border border-gray-200 bg-white p-5 shadow-xl sm:p-7">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold text-[#2E7D32]">NOTIFICACIONES</p>
                 <h2 id="sonido-title" className="mt-1 text-2xl font-bold">Sonido de recordatorios</h2>
               </div>
-              <button type="button" onClick={cerrarConfiguracion} className="h-10 w-10 rounded-full hover:bg-gray-100" aria-label="Cerrar configuración">×</button>
+              <button type="button" onClick={cerrarConfiguracion} className="modal-close-button" aria-label="Cerrar configuración">x</button>
             </div>
 
             <div className={`mt-5 flex flex-col items-start justify-between gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center ${permiso === "granted" ? "border-[#B7D8B9] bg-[#F7FBF7]" : "border-gray-200 bg-gray-50"}`}>
@@ -256,8 +256,8 @@ export function RecordatorioAlarma() {
       )}
 
       {activo && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-7 text-center shadow-xl">
+        <div className="modal-scroll-layer fixed inset-0 z-[70] flex justify-center bg-black/50 p-3 sm:p-4">
+          <div className="modal-scroll-panel w-full max-w-md rounded-3xl border border-gray-200 bg-white p-5 text-center shadow-xl sm:p-7">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#2E7D32]/10 text-[#2E7D32]"><Volume2 size={32} /></div>
             <h2 className="mt-5 text-3xl font-bold">Hora de tu medicación</h2>
             <p className="mt-3 text-lg text-[#747970]">Es momento de tomar <strong className="text-[#212121]">{activo.canal || "tu medicamento"}</strong>.</p>

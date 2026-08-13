@@ -373,7 +373,7 @@ export function Medicamentos() {
                 className="group bg-white border border-gray-200 rounded-3xl p-6 shadow-sm opacity-0 animate-[slideUp_.6s_ease-out_forwards] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                 style={{ animationDelay: `${index * 120}ms` }}
               >
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+                <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
                   <div className="flex items-start gap-5">
                     <div className="w-16 h-16 rounded-2xl bg-[#2E7D32]/10 flex items-center justify-center text-3xl transition-transform duration-300 group-hover:scale-110">
                       +
@@ -436,10 +436,10 @@ export function Medicamentos() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1 xl:w-40 xl:shrink-0">
                     <Link
                       to={`/app/medicamentos/${medicamento.id}`}
-                      className="border border-[#B7D8B9] bg-[#F7FBF7] px-6 py-3 text-center font-semibold text-[#2E7D32] rounded-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E8F5E9] active:scale-[0.98]"
+                      className="whitespace-nowrap border border-[#B7D8B9] bg-[#F7FBF7] px-6 py-3 text-center font-semibold text-[#2E7D32] rounded-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E8F5E9] active:scale-[0.98]"
                     >
                       Ver detalle
                     </Link>
@@ -451,21 +451,21 @@ export function Medicamentos() {
                           ? `Horarios: ${medicamento.horarios.map((item) => item.hora).join(", ")}`
                           : textoVentanaConfirmacion(medicamento.horario)
                       }
-                      className="bg-[#2E7D32] text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed disabled:shadow-none"
+                      className="whitespace-nowrap bg-[#2E7D32] text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed disabled:shadow-none"
                     >
                       Confirmar
                     </button>
 
                     <button
                       onClick={() => abrirEdicion(medicamento)}
-                      className="border border-gray-300 px-6 py-3 rounded-2xl transition-all duration-300 hover:bg-gray-100 hover:-translate-y-0.5 active:scale-[0.98]"
+                      className="whitespace-nowrap border border-gray-300 px-6 py-3 rounded-2xl text-[#212121] transition-all duration-300 hover:bg-[#F7FBF7] hover:-translate-y-0.5 active:scale-[0.98]"
                     >
                       Editar
                     </button>
 
                     <button
                       onClick={() => setEliminandoId(medicamento.id)}
-                      className="border border-red-200 text-red-600 px-6 py-3 rounded-2xl transition-all duration-300 hover:bg-red-50 hover:-translate-y-0.5 active:scale-[0.98]"
+                      className="whitespace-nowrap border border-red-200 text-red-600 px-6 py-3 rounded-2xl transition-all duration-300 hover:bg-red-50 hover:-translate-y-0.5 active:scale-[0.98]"
                     >
                       Eliminar
                     </button>
@@ -477,22 +477,24 @@ export function Medicamentos() {
         </div>
 
         {open && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4 animate-[fadeIn_.25s_ease-out]">
-            <div className="bg-white w-full max-w-5xl rounded-3xl p-4 shadow-xl animate-[modalPop_.3s_ease-out] sm:p-5">
+          <div className="modal-scroll-layer fixed inset-0 bg-black/40 flex justify-center z-50 p-3 sm:p-4 animate-[fadeIn_.25s_ease-out]">
+            <div className="modal-scroll-panel medication-modal-panel bg-white w-full max-w-5xl rounded-3xl p-4 shadow-xl animate-[modalPop_.3s_ease-out] sm:p-5">
               <div className="flex justify-between items-center gap-3">
                 <h2 className="text-2xl sm:text-3xl font-bold text-[#2E7D32]">
                   {editingId ? "Editar medicamento" : "Nuevo medicamento"}
                 </h2>
 
                 <button
+                  type="button"
                   onClick={() => setOpen(false)}
-                  className="text-xl sm:text-2xl text-gray-500 transition-all duration-300 hover:text-black hover:rotate-90"
+                  aria-label="Cerrar"
+                  className="modal-close-button"
                 >
                   x
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="mt-4 grid gap-3 lg:grid-cols-2">
+              <form onSubmit={handleSubmit} className="medication-modal-form mt-4 grid gap-3 lg:grid-cols-2">
                 <input
                   type="text"
                   name="nombre"
