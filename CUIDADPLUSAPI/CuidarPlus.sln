@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.6.11806.211 stable
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CuidarPlus", "CuidarPlus.csproj", "{D808D185-80B2-48C4-ACE5-49FD44709684}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D808D185-80B2-48C4-ACE5-49FD44709684}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D808D185-80B2-48C4-ACE5-49FD44709684}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D808D185-80B2-48C4-ACE5-49FD44709684}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D808D185-80B2-48C4-ACE5-49FD44709684}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E1518C2B-315D-4C6D-BCA9-0CE113BE6D9F}
+	EndGlobalSection
+EndGlobal

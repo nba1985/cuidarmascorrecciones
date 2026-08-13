@@ -1,0 +1,545 @@
+USE [CuidarPlus]
+GO
+/****** Object:  Table [dbo].[GRUPOS_SANGUINEOS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[GRUPOS_SANGUINEOS](
+	[ID_grupo_sanguineo] [int] IDENTITY(1,1) NOT NULL,
+	[Tipo] [varchar](10) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_grupo_sanguineo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ALERGIAS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ALERGIAS](
+	[ID_alergia] [int] IDENTITY(1,1) NOT NULL,
+	[Descripcion] [varchar](150) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_alergia] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[CONDICIONES]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[CONDICIONES](
+	[ID_condicion] [int] IDENTITY(1,1) NOT NULL,
+	[Tipo] [varchar](100) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_condicion] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[SEGUROS_MEDICOS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[SEGUROS_MEDICOS](
+	[ID_Seguro_medico] [int] IDENTITY(1,1) NOT NULL,
+	[Compania] [varchar](100) NOT NULL,
+	[Numero_poliza] [varchar](50) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_Seguro_medico] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[USUARIOS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[USUARIOS](
+	[ID_usuario] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [varchar](100) NOT NULL,
+	[Apellido] [varchar](100) NOT NULL,
+	[Ciudad] [varchar](100) NULL,
+	[Fecha_nacimiento] [date] NULL,
+	[DNI] [varchar](20) NULL,
+	[Foto] [varchar](255) NULL,
+	[Fecha_alta] [date] NULL,
+	[Fecha_baja] [date] NULL,
+	[Mail] [varchar](150) NULL,
+	[ID_grupo_sanguineo] [int] NULL,
+	[ID_UsuarioTipo] [int] NULL,
+	[ID_alergia] [int] NULL,
+	[ID_condicion] [int] NULL,
+	[ID_Seguro_medico] [int] NULL,
+	[ID_usuario_padre] [int] NULL,
+	[ID_parentezco] [varchar](50) NULL,
+	[PasswordHash] [nvarchar](255) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_usuario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[Mail] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[PASSWORD_RESET_TOKENS]    Script Date: 25/6/2026 ******/ 
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[PASSWORD_RESET_TOKENS](
+	[ID_password_reset_token] [int] IDENTITY(1,1) NOT NULL,
+	[ID_usuario] [int] NOT NULL,
+	[TokenHash] [nvarchar](128) NOT NULL,
+	[Fecha_creacion] [datetime2](0) NOT NULL,
+	[Fecha_expiracion] [datetime2](0) NOT NULL,
+	[Fecha_uso] [datetime2](0) NULL,
+	[Usado] [bit] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_password_reset_token] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TELEFONOS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TELEFONOS](
+	[ID_telefono] [int] IDENTITY(1,1) NOT NULL,
+	[Numero] [varchar](30) NOT NULL,
+	[Tipo] [varchar](50) NOT NULL,
+	[ID_usuario] [int] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_telefono] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[VW_PerfilUsuario]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[VW_PerfilUsuario]
+AS
+
+SELECT
+
+    u.ID_usuario,
+
+    u.Nombre + ' ' + u.Apellido AS NombreCompleto,
+
+    u.Ciudad,
+
+    u.Fecha_nacimiento,
+
+    DATEDIFF(YEAR, u.Fecha_nacimiento, GETDATE()) AS Edad,
+
+    u.DNI,
+
+    u.Mail,
+
+    ISNULL(gs.Tipo, 'Sin grupo sanguíneo') AS GrupoSanguineo,
+
+    ISNULL(sm.Compania, 'Sin seguro médico') AS SeguroMedico,
+
+    ISNULL(sm.Numero_poliza, 'Sin póliza') AS NumeroPoliza,
+
+    ISNULL(a.Descripcion, 'Sin alergia') AS Alergia,
+
+    ISNULL(c.Tipo, 'Sin condición') AS Condicion,
+
+    t.Tipo AS TipoTelefono,
+
+    t.Numero AS Telefono,
+
+    ISNULL(contacto.Nombre + ' ' + contacto.Apellido, 'Sin contacto') AS ContactoEmergencia,
+
+    ISNULL(contacto.ID_parentezco, 'Sin parentesco') AS Parentesco
+
+FROM USUARIOS u
+
+LEFT JOIN GRUPOS_SANGUINEOS gs
+    ON u.ID_grupo_sanguineo = gs.ID_grupo_sanguineo
+
+LEFT JOIN SEGUROS_MEDICOS sm
+    ON u.ID_Seguro_medico = sm.ID_Seguro_medico
+
+LEFT JOIN ALERGIAS a
+    ON u.ID_alergia = a.ID_alergia
+
+LEFT JOIN CONDICIONES c
+    ON u.ID_condicion = c.ID_condicion
+
+LEFT JOIN TELEFONOS t
+    ON u.ID_usuario = t.ID_usuario
+
+LEFT JOIN USUARIOS contacto
+    ON contacto.ID_usuario_padre = u.ID_usuario;
+
+GO
+/****** Object:  Table [dbo].[COMPONENTES]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[COMPONENTES](
+	[ID_componente] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [varchar](100) NOT NULL,
+	[Descripcion] [varchar](255) NULL,
+	[ID_medicamento] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_componente] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ESPECIALIDADES]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ESPECIALIDADES](
+	[ID_especialidad] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [varchar](100) NOT NULL,
+	[ID_medico] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_especialidad] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ESTADOS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ESTADOS](
+	[ID_estado] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [varchar](100) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_estado] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[HISTORIALES_ANIMO]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[HISTORIALES_ANIMO](
+	[ID_historial_animo] [int] IDENTITY(1,1) NOT NULL,
+	[Fecha] [date] NOT NULL,
+	[Hora] [time](7) NOT NULL,
+	[Observaciones] [varchar](255) NULL,
+	[ID_usuario] [int] NULL,
+	[ID_estado] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_historial_animo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[HORARIOS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[HORARIOS](
+	[ID_horario] [int] IDENTITY(1,1) NOT NULL,
+	[Hora_programada] [time](7) NOT NULL,
+	[Activo] [bit] NOT NULL,
+	[ID_recordatorio] [int] NULL,
+	[ID_tratamiento] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_horario] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[LABORATORIOS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[LABORATORIOS](
+	[ID_laboratorio] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [varchar](100) NOT NULL,
+	[Telefono_unico] [varchar](30) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_laboratorio] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[MEDICAMENTOS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[MEDICAMENTOS](
+	[ID_medicamento] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [varchar](100) NOT NULL,
+	[Descripcion] [varchar](255) NULL,
+	[Presentacion] [varchar](100) NULL,
+	[ID_laboratorio] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_medicamento] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[MEDICOS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[MEDICOS](
+	[ID_medico] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [varchar](100) NOT NULL,
+	[Apellido] [varchar](100) NOT NULL,
+	[Matricula] [varchar](50) NOT NULL,
+	[Telefono_unico] [varchar](30) NULL,
+	[Email] [varchar](150) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_medico] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[NOTIFICACIONES]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[NOTIFICACIONES](
+	[ID_notificacion] [int] IDENTITY(1,1) NOT NULL,
+	[Tipo] [varchar](50) NULL,
+	[Mensaje] [varchar](255) NULL,
+	[ID_recordatorio] [int] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_notificacion] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[RECETAS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[RECETAS](
+	[ID_receta] [int] IDENTITY(1,1) NOT NULL,
+	[Archivos] [varchar](max) NULL,
+	[Observaciones] [varchar](255) NULL,
+	[ID_medico] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_receta] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[RECORDATORIOS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[RECORDATORIOS](
+	[ID_recordatorio] [int] IDENTITY(1,1) NOT NULL,
+	[Canal] [varchar](50) NULL,
+	[FechaHoraProgramada] [datetime] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_recordatorio] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[REGISTROS_TOMAS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[REGISTROS_TOMAS](
+	[ID_registro_toma] [int] IDENTITY(1,1) NOT NULL,
+	[Estado] [bit] NOT NULL,
+	[Fecha_hora_real] [datetime] NOT NULL,
+	[Observaciones] [varchar](max) NULL,
+	[ID_recordatorio] [int] NULL,
+	[ID_historial_animo] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_registro_toma] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TRATAMIENTOS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TRATAMIENTOS](
+	[ID_tratamiento] [int] IDENTITY(1,1) NOT NULL,
+	[FechaInicio] [date] NOT NULL,
+	[FechaFin] [date] NULL,
+	[Frecuencia] [time](7) NULL,
+	[ID_usuario] [int] NOT NULL,
+	[ID_medicamento] [int] NULL,
+	[ID_receta] [int] NULL,
+	[ID_medico] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_tratamiento] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[USUARIOS_TIPOS]    Script Date: 11/6/2026 21:46:55 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[USUARIOS_TIPOS](
+	[ID_UsuarioTipo] [int] IDENTITY(1,1) NOT NULL,
+	[Nombre] [varchar](50) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ID_UsuarioTipo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[HORARIOS] ADD  DEFAULT ((1)) FOR [Activo]
+GO
+ALTER TABLE [dbo].[REGISTROS_TOMAS] ADD  DEFAULT (getdate()) FOR [Fecha_hora_real]
+GO
+ALTER TABLE [dbo].[USUARIOS] ADD  DEFAULT (getdate()) FOR [Fecha_alta]
+GO
+ALTER TABLE [dbo].[PASSWORD_RESET_TOKENS] ADD CONSTRAINT [DF_PasswordResetTokens_FechaCreacion] DEFAULT (getutcdate()) FOR [Fecha_creacion]
+GO
+ALTER TABLE [dbo].[PASSWORD_RESET_TOKENS] ADD CONSTRAINT [DF_PasswordResetTokens_Usado] DEFAULT ((0)) FOR [Usado]
+GO
+ALTER TABLE [dbo].[COMPONENTES]  WITH CHECK ADD  CONSTRAINT [FK_Componentes_Medicamentos] FOREIGN KEY([ID_medicamento])
+REFERENCES [dbo].[MEDICAMENTOS] ([ID_medicamento])
+GO
+ALTER TABLE [dbo].[COMPONENTES] CHECK CONSTRAINT [FK_Componentes_Medicamentos]
+GO
+ALTER TABLE [dbo].[ESPECIALIDADES]  WITH CHECK ADD  CONSTRAINT [FK_Especialidades_Medicos] FOREIGN KEY([ID_medico])
+REFERENCES [dbo].[MEDICOS] ([ID_medico])
+GO
+ALTER TABLE [dbo].[ESPECIALIDADES] CHECK CONSTRAINT [FK_Especialidades_Medicos]
+GO
+ALTER TABLE [dbo].[HISTORIALES_ANIMO]  WITH CHECK ADD  CONSTRAINT [FK_HistorialAnimo_Estados] FOREIGN KEY([ID_estado])
+REFERENCES [dbo].[ESTADOS] ([ID_estado])
+GO
+ALTER TABLE [dbo].[HISTORIALES_ANIMO] CHECK CONSTRAINT [FK_HistorialAnimo_Estados]
+GO
+ALTER TABLE [dbo].[HISTORIALES_ANIMO]  WITH CHECK ADD  CONSTRAINT [FK_HistorialAnimo_Usuarios] FOREIGN KEY([ID_usuario])
+REFERENCES [dbo].[USUARIOS] ([ID_usuario])
+GO
+ALTER TABLE [dbo].[HISTORIALES_ANIMO] CHECK CONSTRAINT [FK_HistorialAnimo_Usuarios]
+GO
+ALTER TABLE [dbo].[HORARIOS]  WITH CHECK ADD  CONSTRAINT [FK_Horarios_Recordatorios] FOREIGN KEY([ID_recordatorio])
+REFERENCES [dbo].[RECORDATORIOS] ([ID_recordatorio])
+GO
+ALTER TABLE [dbo].[HORARIOS] CHECK CONSTRAINT [FK_Horarios_Recordatorios]
+GO
+ALTER TABLE [dbo].[HORARIOS]  WITH CHECK ADD  CONSTRAINT [FK_Horarios_Tratamientos] FOREIGN KEY([ID_tratamiento])
+REFERENCES [dbo].[TRATAMIENTOS] ([ID_tratamiento])
+GO
+ALTER TABLE [dbo].[HORARIOS] CHECK CONSTRAINT [FK_Horarios_Tratamientos]
+GO
+ALTER TABLE [dbo].[MEDICAMENTOS]  WITH CHECK ADD  CONSTRAINT [FK_Medicamentos_Laboratorios] FOREIGN KEY([ID_laboratorio])
+REFERENCES [dbo].[LABORATORIOS] ([ID_laboratorio])
+GO
+ALTER TABLE [dbo].[MEDICAMENTOS] CHECK CONSTRAINT [FK_Medicamentos_Laboratorios]
+GO
+ALTER TABLE [dbo].[NOTIFICACIONES]  WITH CHECK ADD  CONSTRAINT [FK_Notificaciones_Recordatorios] FOREIGN KEY([ID_recordatorio])
+REFERENCES [dbo].[RECORDATORIOS] ([ID_recordatorio])
+GO
+ALTER TABLE [dbo].[NOTIFICACIONES] CHECK CONSTRAINT [FK_Notificaciones_Recordatorios]
+GO
+ALTER TABLE [dbo].[RECETAS]  WITH CHECK ADD  CONSTRAINT [FK_Recetas_Medicos] FOREIGN KEY([ID_medico])
+REFERENCES [dbo].[MEDICOS] ([ID_medico])
+GO
+ALTER TABLE [dbo].[RECETAS] CHECK CONSTRAINT [FK_Recetas_Medicos]
+GO
+ALTER TABLE [dbo].[REGISTROS_TOMAS]  WITH CHECK ADD  CONSTRAINT [FK_RegistrosTomas_HistorialAnimo] FOREIGN KEY([ID_historial_animo])
+REFERENCES [dbo].[HISTORIALES_ANIMO] ([ID_historial_animo])
+GO
+ALTER TABLE [dbo].[REGISTROS_TOMAS] CHECK CONSTRAINT [FK_RegistrosTomas_HistorialAnimo]
+GO
+ALTER TABLE [dbo].[REGISTROS_TOMAS]  WITH CHECK ADD  CONSTRAINT [FK_RegistrosTomas_Recordatorios] FOREIGN KEY([ID_recordatorio])
+REFERENCES [dbo].[RECORDATORIOS] ([ID_recordatorio])
+GO
+ALTER TABLE [dbo].[REGISTROS_TOMAS] CHECK CONSTRAINT [FK_RegistrosTomas_Recordatorios]
+GO
+ALTER TABLE [dbo].[PASSWORD_RESET_TOKENS] WITH CHECK ADD CONSTRAINT [FK_PasswordResetTokens_Usuarios] FOREIGN KEY([ID_usuario])
+REFERENCES [dbo].[USUARIOS] ([ID_usuario])
+GO
+ALTER TABLE [dbo].[PASSWORD_RESET_TOKENS] CHECK CONSTRAINT [FK_PasswordResetTokens_Usuarios]
+GO
+ALTER TABLE [dbo].[TELEFONOS]  WITH CHECK ADD  CONSTRAINT [FK_Telefono_Usuario] FOREIGN KEY([ID_usuario])
+REFERENCES [dbo].[USUARIOS] ([ID_usuario])
+GO
+ALTER TABLE [dbo].[TELEFONOS] CHECK CONSTRAINT [FK_Telefono_Usuario]
+GO
+ALTER TABLE [dbo].[TRATAMIENTOS]  WITH CHECK ADD  CONSTRAINT [FK_Tratamientos_Medicamentos] FOREIGN KEY([ID_medicamento])
+REFERENCES [dbo].[MEDICAMENTOS] ([ID_medicamento])
+GO
+ALTER TABLE [dbo].[TRATAMIENTOS] CHECK CONSTRAINT [FK_Tratamientos_Medicamentos]
+GO
+ALTER TABLE [dbo].[TRATAMIENTOS]  WITH CHECK ADD  CONSTRAINT [FK_Tratamientos_Medicos] FOREIGN KEY([ID_medico])
+REFERENCES [dbo].[MEDICOS] ([ID_medico])
+GO
+ALTER TABLE [dbo].[TRATAMIENTOS] CHECK CONSTRAINT [FK_Tratamientos_Medicos]
+GO
+ALTER TABLE [dbo].[TRATAMIENTOS]  WITH CHECK ADD  CONSTRAINT [FK_Tratamientos_Recetas] FOREIGN KEY([ID_receta])
+REFERENCES [dbo].[RECETAS] ([ID_receta])
+GO
+ALTER TABLE [dbo].[TRATAMIENTOS] CHECK CONSTRAINT [FK_Tratamientos_Recetas]
+GO
+ALTER TABLE [dbo].[TRATAMIENTOS]  WITH CHECK ADD  CONSTRAINT [FK_Tratamientos_Usuarios] FOREIGN KEY([ID_usuario])
+REFERENCES [dbo].[USUARIOS] ([ID_usuario])
+GO
+ALTER TABLE [dbo].[TRATAMIENTOS] CHECK CONSTRAINT [FK_Tratamientos_Usuarios]
+GO
+ALTER TABLE [dbo].[USUARIOS]  WITH CHECK ADD  CONSTRAINT [FK_Usuario_Alergia] FOREIGN KEY([ID_alergia])
+REFERENCES [dbo].[ALERGIAS] ([ID_alergia])
+GO
+ALTER TABLE [dbo].[USUARIOS] CHECK CONSTRAINT [FK_Usuario_Alergia]
+GO
+ALTER TABLE [dbo].[USUARIOS]  WITH CHECK ADD  CONSTRAINT [FK_Usuario_Condicion] FOREIGN KEY([ID_condicion])
+REFERENCES [dbo].[CONDICIONES] ([ID_condicion])
+GO
+ALTER TABLE [dbo].[USUARIOS] CHECK CONSTRAINT [FK_Usuario_Condicion]
+GO
+ALTER TABLE [dbo].[USUARIOS]  WITH CHECK ADD  CONSTRAINT [FK_Usuario_GrupoSanguineo] FOREIGN KEY([ID_grupo_sanguineo])
+REFERENCES [dbo].[GRUPOS_SANGUINEOS] ([ID_grupo_sanguineo])
+GO
+ALTER TABLE [dbo].[USUARIOS] CHECK CONSTRAINT [FK_Usuario_GrupoSanguineo]
+GO
+ALTER TABLE [dbo].[USUARIOS]  WITH CHECK ADD  CONSTRAINT [FK_Usuario_Seguro] FOREIGN KEY([ID_Seguro_medico])
+REFERENCES [dbo].[SEGUROS_MEDICOS] ([ID_Seguro_medico])
+GO
+ALTER TABLE [dbo].[USUARIOS] CHECK CONSTRAINT [FK_Usuario_Seguro]
+GO
+ALTER TABLE [dbo].[USUARIOS]  WITH CHECK ADD  CONSTRAINT [FK_Usuario_Tipo] FOREIGN KEY([ID_UsuarioTipo])
+REFERENCES [dbo].[USUARIOS_TIPOS] ([ID_UsuarioTipo])
+GO
+ALTER TABLE [dbo].[USUARIOS] CHECK CONSTRAINT [FK_Usuario_Tipo]
+GO
+ALTER TABLE [dbo].[USUARIOS]  WITH CHECK ADD  CONSTRAINT [FK_Usuario_UsuarioPadre] FOREIGN KEY([ID_usuario_padre])
+REFERENCES [dbo].[USUARIOS] ([ID_usuario])
+GO
+ALTER TABLE [dbo].[USUARIOS] CHECK CONSTRAINT [FK_Usuario_UsuarioPadre]
+GO
