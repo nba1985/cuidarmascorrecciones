@@ -1,0 +1,16 @@
+{
+  "name": "Cuidar+",
+  "short_name": "Cuidar+",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#2e7d32",
+  "icons": [
+    {
+      "src": "/logo%20mas%20ok.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

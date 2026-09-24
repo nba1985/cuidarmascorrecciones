@@ -1,0 +1,9 @@
+Colocar en esta carpeta el ringtone con el nombre:
+
+alarma.mp3
+
+Ruta final:
+public/audio/alarma.mp3
+
+Si el archivo no existe o el navegador no puede reproducirlo, Cuidar+ utiliza
+automaticamente el tono electronico de respaldo.
